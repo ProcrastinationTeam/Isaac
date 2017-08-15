@@ -38,10 +38,10 @@ class TiledLevel extends TiledMap
 	private inline static var c_PATH_LEVEL_TILESHEETS = "assets/tiled/";
 	
 	// Array of tilemaps used for collision
-	public var foregroundTiles:FlxGroup;
+	//public var foregroundTiles:FlxGroup;
 	public var foregroundSpriteTiles:FlxTypedGroup<FlxSprite>;
-	public var collidableTiles:FlxGroup;
-	public var objectsLayer:FlxTypedGroup<FlxSprite>;
+	public var collidableSpriteTiles:FlxGroup;
+	public var objectsSpriteLayer:FlxTypedGroup<FlxSprite>;
 	public var backgroundLayer:FlxGroup;
 	private var collidableTileLayers:Array<FlxTilemap>;
 	
@@ -55,10 +55,10 @@ class TiledLevel extends TiledMap
 		super(tiledLevel);
 		
 		//imagesLayer = new FlxGroup();
-		foregroundTiles = new FlxGroup();
+		//foregroundTiles = new FlxGroup();
 		foregroundSpriteTiles = new FlxTypedGroup<FlxSprite>();
-		collidableTiles = new FlxGroup();
-		objectsLayer = new FlxTypedGroup<FlxSprite>();
+		collidableSpriteTiles = new FlxGroup();
+		objectsSpriteLayer = new FlxTypedGroup<FlxSprite>();
 		backgroundLayer = new FlxGroup();
 		
 		FlxG.camera.setScrollBoundsRect(0, 0, fullWidth, fullHeight, true);
@@ -78,7 +78,7 @@ class TiledLevel extends TiledMap
 				var y = Std.parseInt(hitbox.att.y);
 				var width = Std.parseInt(hitbox.att.width);
 				var height = Std.parseInt(hitbox.att.height);
-				trace("id : " + id + " - x : " + x + " - y : " + y + " - width : " + width + " - height : " + height);
+				//trace("id : " + id + " - x : " + x + " - y : " + y + " - width : " + width + " - height : " + height);
 				if (hitboxesMap.get(id) == null) {
 					hitboxesMap.set(id, new Array<Hitbox>());
 				}
@@ -149,17 +149,16 @@ class TiledLevel extends TiledMap
 			else
 			{
 				// TODO: mieux gérer, je me demande si on réajoute pas pour rien
-				foregroundTiles.add(tilemap);
+				//foregroundTiles.add(tilemap);
 				//collidableTileLayers.push(tilemap);
 				
-				if (collidableTileLayers == null) {
-					collidableTileLayers = new Array<FlxTilemap>();
-				}
+				//if (collidableTileLayers == null) {
+					//collidableTileLayers = new Array<FlxTilemap>();
+				//}
 				
 				for (key in hitboxesMap.keys()) {
-					trace(key);
+					//trace(key);
 					var tilesCoords = tilemap.getTileCoords(key + 1); // + 1 pour le premier tile vide qui décale ?
-					//trace(tilesCoords);
 					// Si on check pas, si y'a pas d'éléments ça bug
 					if (tilesCoords != null) {
 						for (tileCoord in tilesCoords) {
@@ -171,12 +170,12 @@ class TiledLevel extends TiledMap
 							var newSprite = tilemap.tileToSprite(newX, newY, function(tileProperties:FlxTileProperties):FlxSprite {
 								//TODO: génériser
 								var spriteGroup = new FlxSpriteGroup(tileCoord.x - 8, tileCoord.y - 8);
-								var actualSprite = new FlxSprite();
-								actualSprite.frame = tileProperties.graphic.frame;
-								actualSprite.immovable = true;
-								actualSprite.allowCollisions = FlxObject.NONE;
-								actualSprite.setSize(16, 16);
-								spriteGroup.add(actualSprite);
+								var sprite = new FlxSprite();
+								sprite.frame = tileProperties.graphic.frame;
+								sprite.immovable = true;
+								sprite.allowCollisions = FlxObject.NONE;
+								sprite.setSize(16, 16);
+								spriteGroup.add(sprite);
 								var hitboxescestchouette = hitboxesMap.get(key);
 								for (hitbox in hitboxescestchouette) {
 									var spriteHitbox = new FlxSprite(hitbox.x, hitbox.y);
@@ -190,12 +189,29 @@ class TiledLevel extends TiledMap
 								return spriteGroup;
 							});
 							foregroundSpriteTiles.add(newSprite);
-							collidableTiles.add(newSprite);
+							collidableSpriteTiles.add(newSprite);
 						}
 					}
 				}
 				
-
+				for (y in 0...15) {
+					for (x in 0...15) {
+						if (tilemap.getTile(x, y) != 0) {
+							// pas encore sprité
+							var newSprite = tilemap.tileToSprite(x, y, function(tileProperties:FlxTileProperties):FlxSprite {
+								//TODO: génériser
+								var sprite = new FlxSprite(x * 16, y * 16);
+								sprite.frame = tileProperties.graphic.frame;
+								sprite.immovable = true;
+								sprite.allowCollisions = FlxObject.NONE;
+								sprite.setSize(16, 16);
+								return sprite;
+							});
+							foregroundSpriteTiles.add(newSprite);
+							collidableSpriteTiles.add(newSprite);
+						}
+					}
+				}
 			}
 		}
 	}
@@ -244,7 +260,7 @@ class TiledLevel extends TiledMap
 			{
 				for (o in objectLayer.objects)
 				{
-					loadObject(state, o, objectLayer, objectsLayer);
+					loadObject(state, o, objectLayer, objectsSpriteLayer);
 				}
 			}
 		}
@@ -345,7 +361,7 @@ class TiledLevel extends TiledMap
 	
 	public function collideWithLevel(obj:FlxObject, ?notifyCallback:FlxObject->FlxObject->Void, ?processCallback:FlxObject->FlxObject->Bool):Bool
 	{
-		for (sprite in collidableTiles)
+		for (sprite in collidableSpriteTiles)
 		{
 			//TODO: http://forum.haxeflixel.com/topic/512/strange-collision-issue/5
 			// Pour réparer le problème de blocage dans les murs quand on monte ?
@@ -355,15 +371,15 @@ class TiledLevel extends TiledMap
 		//if (collidableTileLayers == null)
 			//return false;
 
-		for (sprite in collidableTileLayers)
-		{
-			// IMPORTANT: Always collide the map with objects, not the other way around.
-			//            This prevents odd collision errors (collision separation code off by 1 px).
-			if (FlxG.overlap(sprite, obj, notifyCallback, processCallback != null ? processCallback : FlxObject.separate))
-			{
-				return true;
-			}
-		}
+		//for (sprite in collidableTileLayers)
+		//{
+			//// IMPORTANT: Always collide the map with objects, not the other way around.
+			////            This prevents odd collision errors (collision separation code off by 1 px).
+			//if (FlxG.overlap(sprite, obj, notifyCallback, processCallback != null ? processCallback : FlxObject.separate))
+			//{
+				//return true;
+			//}
+		//}
 		return false;
 	}
 }

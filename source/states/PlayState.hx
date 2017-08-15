@@ -59,7 +59,7 @@ class PlayState extends FlxState
 		add(_level.backgroundLayer);
 		
 		// TODO: rentre pas dans le maxigroup, fait chier
-		add(_level.foregroundTiles);
+		//add(_level.foregroundTiles);
 		
 		// TODO: chelou que ça marche pas dans l'autre sens
 		// Add foreground tiles after adding level objects, so these tiles render on top of player
@@ -71,7 +71,7 @@ class PlayState extends FlxState
 		
 		// Add objects layer
 		//add(_level.objectsLayer);
-		_level.objectsLayer.forEach(function(sprite:FlxSprite)
+		_level.objectsSpriteLayer.forEach(function(sprite:FlxSprite)
 		{
 			_maxiGroup.add(sprite);
 		});
