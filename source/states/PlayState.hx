@@ -24,6 +24,8 @@ class PlayState extends FlxState
 
 	public var _player 								: Player;
 	public var _exits 								: FlxTypedGroup<FlxSprite>;
+	
+	private var _maxiGroup 							: FlxTypedGroup<FlxSprite>;
 
 	public var _currentLevel						: Levels = TUTO;
 
@@ -36,6 +38,8 @@ class PlayState extends FlxState
 	override public function create():Void
 	{
 		_exits = new FlxTypedGroup<FlxSprite>();
+		
+		_maxiGroup = new FlxTypedGroup<FlxSprite>();
 		
 		switch (_currentLevel)
 		{
@@ -54,21 +58,41 @@ class PlayState extends FlxState
 		// Add backgrounds
 		add(_level.backgroundLayer);
 		
-		// TODO: chelou que ça marche pas dans l'autre sens
-		// Add foreground tiles after adding level objects, so these tiles render on top of player
+		// TODO: rentre pas dans le maxigroup, fait chier
 		add(_level.foregroundTiles);
 		
-		// Load player objects
-		add(_level.objectsLayer);
+		// TODO: chelou que ça marche pas dans l'autre sens
+		// Add foreground tiles after adding level objects, so these tiles render on top of player
+		//add(_level.foregroundSpriteTiles);
+		_level.foregroundSpriteTiles.forEach(function(sprite:FlxSprite)
+		{
+			_maxiGroup.add(sprite);
+		});
+		
+		// Add objects layer
+		//add(_level.objectsLayer);
+		_level.objectsLayer.forEach(function(sprite:FlxSprite)
+		{
+			_maxiGroup.add(sprite);
+		});
+		
+		add(_maxiGroup);
 		
 		FlxG.camera.zoom = 3;
 
 		super.create();
 	}
+	
+	public function byYDown(Order:Int, Obj1:FlxObject, Obj2:FlxObject):Int
+	{
+		return Obj1.y + Obj1.height < Obj2.y + Obj2.height ? -1 : 1;
+	}
 
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
+		
+		_maxiGroup.sort(byYDown);
 
 		_level.collideWithLevel(_player);
 
@@ -101,6 +125,8 @@ class PlayState extends FlxState
 						_player.y = 32;
 				}
 			}
+			
+			FlxG.camera.zoom += FlxG.mouse.wheel / 20;
 		}
 		////////////////////////////////////////////////// FIN SECTION DEBUG
 		#end
