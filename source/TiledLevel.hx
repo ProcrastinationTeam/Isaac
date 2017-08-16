@@ -31,7 +31,7 @@ typedef Hitbox = { x : Int, y : Int, width : Int, height : Int}
 /**
  * @author Samuel Batista
  */
-class TiledLevel extends TiledMap
+class TiledLevel extends TiledMapExternalTileset
 {
 	// For each "Tile Layer" in the map, you must define a "tileset" property which contains the name of a tile sheet image 
 	// used to draw tiles in that layer (without file extension). The image file must be located in the directory specified bellow.
@@ -67,7 +67,8 @@ class TiledLevel extends TiledMap
 		hitboxesMap = new Map<Int, Array<Hitbox>>();
 		
 		var source:Fast = new Fast(Xml.parse(Assets.getText(tiledLevel)));
-		var nodes = source.node.map.node.tileset.nodes.tile;
+		var tilesetSource:Fast = new Fast(Xml.parse(Assets.getText("assets/tiled/" + source.node.map.node.tileset.att.source)));
+		var nodes = tilesetSource.node.tileset.nodes.tile;
 		for (tileNode in nodes) {
 			//trace(node.att.id);
 			var id:Int = Std.parseInt(tileNode.att.id);
@@ -85,6 +86,7 @@ class TiledLevel extends TiledMap
 				hitboxesMap.get(id).push({x : x, y : y, width : width, height : height});
 			}
 		}
+		//
 		
 		//loadImages();
 		loadObjects(state);
