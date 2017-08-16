@@ -1,4 +1,4 @@
-package;
+package old;
 
 import flixel.addons.editors.tiled.TiledMap;
 import flixel.addons.editors.tiled.TiledTileSet;
@@ -13,11 +13,12 @@ class TiledMapExternalTileset extends TiledMap
 		super(data, rootPath);
 	}
 
+	// TODO: Ajouter aussi les objectsgroup ?
 	private override function loadTilesets(source:Fast):Void
 	{
 		for (node in source.nodes.tileset)
 		{
-			//TODO; virer la string en dur d'ici
+			// TODO; virer la string en dur d'ici
 			var tilesetSource = new Fast(Xml.parse(Assets.getText("assets/tiled/" + node.att.source)));
 
 			node = tilesetSource.node.tileset;
