@@ -21,14 +21,14 @@ import haxe.io.Path;
 import haxe.xml.Fast;
 import openfl.Assets;
 import states.PlayState;
-
-typedef Hitbox = { x : Int, y : Int, width : Int, height : Int}
+import structs.Hitbox;
 
 // TODO: Séparer la gestion de la Room / Jeu
 class TiledLevel extends TiledMap
 {
 	// For each "Tile Layer" in the map, you must define a "tileset" property which contains the name of a tile sheet image
 	// used to draw tiles in that layer (without file extension). The image file must be located in the directory specified bellow.
+	// TODO: ça va sortir d'ici
 	private inline static var c_PATH_LEVEL_TILESHEETS = "assets/tiled/";
 
 	public var backgroundLayer:FlxGroup;
@@ -37,14 +37,17 @@ class TiledLevel extends TiledMap
 
 	public var hitboxesMap:Map<Int, Array<Hitbox>>;
 
+	// TODO: Faudrait sortir l'init du tileset et des hitbox, même si pour le tileset c'est mort je pense (ça le fait dans le super)
 	public function new(tiledLevel:Dynamic, state:PlayState)
 	{
 		super(tiledLevel, c_PATH_LEVEL_TILESHEETS);
-
+		EncapsulateTilesetHitboxes.instance.init(tilesets.get("tileset"));
+		trace(EncapsulateTilesetHitboxes.instance._tileSet.numTiles);
+		
 		backgroundLayer = new FlxGroup();
 		foregroundSpriteTiles = new FlxTypedGroup<FlxSprite>();
 		objectsSpriteTiles = new FlxTypedGroup<FlxSprite>();
-		
+
 		hitboxesMap = new Map<Int, Array<Hitbox>>();
 
 		FlxG.camera.setScrollBoundsRect(0, 0, fullWidth, fullHeight, true);
@@ -57,9 +60,10 @@ class TiledLevel extends TiledMap
 		// Load des objets
 		loadObjects(state);
 
-		// Load Tile Maps
+		// Load des layers
 		for (layer in layers)
 		{
+			trace(layer.name + " - " + layer.type);
 			if (layer.type != TiledLayerType.TILE) continue;
 			var tileLayer:TiledTileLayer = cast layer;
 
@@ -84,17 +88,14 @@ class TiledLevel extends TiledMap
 			var imagePath:Path 		= new Path(tileSet.imageSource);
 			var processedPath:String 	= c_PATH_LEVEL_TILESHEETS + imagePath.file + "." + imagePath.ext;
 
-			// could be a regular FlxTilemap if there are no animated tiles
-			//var tilemap = new FlxTilemapExt();
 			var tilemap:FlxTilemap = new FlxTilemap();
-			tilemap.loadMapFromArray(tileLayer.tileArray, width, height, processedPath,
-									 tileSet.tileWidth, tileSet.tileHeight, OFF, tileSet.firstGID, 1, 1);
+			tilemap.loadMapFromArray(tileLayer.tileArray, width, height, processedPath, tileSet.tileWidth, tileSet.tileHeight, OFF, tileSet.firstGID, 1, 1);
 
-			if (tileLayer.properties.contains("nocollide"))
+			if (tileLayer.properties.get("layer") == "background")
 			{
 				backgroundLayer.add(tilemap);
 			}
-			else
+			else if(tileLayer.properties.get("layer") == "foreground")
 			{
 				for (key in hitboxesMap.keys())
 				{
@@ -158,6 +159,8 @@ class TiledLevel extends TiledMap
 						}
 					}
 				}
+			} else {
+				trace("layer chelou : " + tileLayer.name);
 			}
 		}
 	}

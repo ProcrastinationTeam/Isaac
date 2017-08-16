@@ -49,9 +49,6 @@
 </data>
  </layer>
  <objectgroup name="Objects">
-  <properties>
-   <property name="tileset" value="tileset"/>
-  </properties>
   <object id="14" name="Exit_West" type="exit" x="-8" y="112" width="3" height="16">
    <properties>
     <property name="direction" value="left"/>
