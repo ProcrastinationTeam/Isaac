@@ -50,19 +50,20 @@ class PlayState extends FlxState
 			case LEVEL_1 :
 				_level = new TiledLevel("assets/tiled/urd.tmx", this);
 			case LEVEL_2 :
-				//
+			//
 			case LEVEL_3 :
-				//
+			//
 			case END :
 				//
 		}
-		
+
 		// TODO: a bien init
-		if (_previousExitDirection == null) {
+		if (_previousExitDirection == null)
+		{
 			_previousExitDirection = Direction.SPECIAL;
 		}
-		
-		switch (_previousExitDirection) 
+
+		switch (_previousExitDirection)
 		{
 			case UP:
 				_player.setPosition(120, 230);
@@ -168,10 +169,31 @@ class PlayState extends FlxState
 	private function PlayerExit(player:Player, exit:Exit):Void
 	{
 		trace(exit._direction);
+		exit.exists = false;
 		if (player.alive && player.exists)
 		{
 			// TODO: next screen
-			FlxG.switchState(new PlayState(exit._direction));
+			switch (exit._direction)
+			{
+				case UP:
+					FlxTween.tween(FlxG.camera, {y: 720}, 0.3, {onComplete: switchState.bind(_, exit)});
+				case RIGHT:
+					FlxTween.tween(FlxG.camera, {x: -720}, 0.3, {onComplete: switchState.bind(_, exit)});
+				case DOWN:
+					FlxTween.tween(FlxG.camera, {y: -720}, 0.3, {onComplete: switchState.bind(_, exit)});
+				case LEFT:
+					FlxTween.tween(FlxG.camera, {x: 720}, 0.3, {onComplete: switchState.bind(_, exit)});
+				case SPECIAL:
+					FlxG.switchState(new PlayState(exit._direction));
+			}
+			//FlxTween.tween(FlxG.camera, {x:720}, 0.3, {onComplete: switchState});
+			//FlxG.switchState(new PlayState(exit._direction));
 		}
+	}
+
+	private function switchState(tween:FlxTween, exit:Exit):Void
+	{
+		Sys.sleep(0.5);
+		FlxG.switchState(new PlayState(exit._direction));
 	}
 }
