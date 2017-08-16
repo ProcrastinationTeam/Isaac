@@ -50,9 +50,9 @@ class PlayState extends FlxState
 			case LEVEL_1 :
 				_level = new TiledLevel("assets/tiled/urd.tmx", this);
 			case LEVEL_2 :
-			//
+				//
 			case LEVEL_3 :
-			//
+				//
 			case END :
 				//
 		}
@@ -93,7 +93,7 @@ class PlayState extends FlxState
 
 		// Add objects layer
 		//add(_level.objectsLayer);
-		_level.objectsSpriteLayer.forEach(function(sprite:FlxSprite)
+		_level.objectsSpriteTiles.forEach(function(sprite:FlxSprite)
 		{
 			_maxiGroup.add(sprite);
 		});
@@ -101,6 +101,8 @@ class PlayState extends FlxState
 		add(_maxiGroup);
 
 		FlxG.camera.zoom = 3;
+		
+		FlxG.camera.fade(FlxColor.BLACK, .2, true);
 
 		super.create();
 	}
@@ -176,16 +178,20 @@ class PlayState extends FlxState
 			switch (exit._direction)
 			{
 				case UP:
-					FlxTween.tween(FlxG.camera, {y: 720}, 0.3, {onComplete: switchState.bind(_, exit)});
+					FlxTween.tween(FlxG.camera, {y: 1000}, 0.3, {onComplete: switchState.bind(_, exit)});
 				case RIGHT:
-					FlxTween.tween(FlxG.camera, {x: -720}, 0.3, {onComplete: switchState.bind(_, exit)});
+					FlxTween.tween(FlxG.camera, {x: -1000}, 0.3, {onComplete: switchState.bind(_, exit)});
 				case DOWN:
-					FlxTween.tween(FlxG.camera, {y: -720}, 0.3, {onComplete: switchState.bind(_, exit)});
+					FlxTween.tween(FlxG.camera, {y: -1000}, 0.3, {onComplete: switchState.bind(_, exit)});
 				case LEFT:
-					FlxTween.tween(FlxG.camera, {x: 720}, 0.3, {onComplete: switchState.bind(_, exit)});
+					FlxTween.tween(FlxG.camera, {x: 1000}, 0.3, {onComplete: switchState.bind(_, exit)});
 				case SPECIAL:
-					FlxG.switchState(new PlayState(exit._direction));
+					//
 			}
+			FlxG.camera.fade(FlxColor.BLACK, 0.3, false, function()
+			{
+				FlxG.switchState(new PlayState(exit._direction));
+			});
 			//FlxTween.tween(FlxG.camera, {x:720}, 0.3, {onComplete: switchState});
 			//FlxG.switchState(new PlayState(exit._direction));
 		}
@@ -193,7 +199,7 @@ class PlayState extends FlxState
 
 	private function switchState(tween:FlxTween, exit:Exit):Void
 	{
-		Sys.sleep(0.5);
-		FlxG.switchState(new PlayState(exit._direction));
+		//Sys.sleep(0.5);
+		//FlxG.switchState(new PlayState(exit._direction));
 	}
 }
