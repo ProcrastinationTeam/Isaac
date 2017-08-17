@@ -52,9 +52,20 @@
   <properties>
    <property name="tileset" value="tileset"/>
   </properties>
-  <object id="14" name="Exit_West" type="exit" x="0" y="120"/>
-  <object id="10" name="Exit_South" type="exit" x="120" y="240"/>
-  <object id="13" name="Exit_East" type="exit" x="240" y="120"/>
-  <object id="11" name="Start" type="player_start" x="120" y="120"/>
+    <object id="14" name="Exit_Left" type="exit" x="-8" y="112" width="3" height="16">
+   <properties>
+    <property name="direction" value="left"/>
+   </properties>
+  </object>
+  <object id="10" name="Exit_Down" type="exit" x="112" y="245" width="16" height="3">
+   <properties>
+    <property name="direction" value="down"/>
+   </properties>
+  </object>
+    <object id="13" name="Exit_Right" type="exit" x="245" y="112" width="3" height="16">
+   <properties>
+    <property name="direction" value="right"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>

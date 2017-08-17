@@ -68,6 +68,9 @@ class TiledLevel extends TiledMap
 		
 		_offsetX = tileWidth * _x * width;
 		_offsetY = tileHeight * _y * height;
+		
+					//trace("x : " + _x + " - " + _offsetX);
+			//trace("y : " + _y + " - " + _offsetY);
 
 		EncapsulateTilesetHitboxes.instance.init(tilesets.get("tileset"));
 		//trace(EncapsulateTilesetHitboxes.instance._tileSet.numTiles);
@@ -205,7 +208,7 @@ class TiledLevel extends TiledMap
 	{
 		var x:Int = object.x + _offsetX;
 		var y:Int = object.y + _offsetY;
-
+		
 		// objects in tiled are aligned bottom-left (top-left in flixel)
 		if (object.gid != -1)
 		{
@@ -215,10 +218,10 @@ class TiledLevel extends TiledMap
 		switch (object.type.toLowerCase())
 		{
 			case "player_start":
+				trace("PLAYER SPAWN A (" + x + "," + y + ")");
 				var player:Player = new Player(x, y);
 				FlxG.camera.follow(player);
 				state._player = player;
-				group.add(player);
 
 			case "exit":
 				var direction:Direction = utils.Utils.stringToEnumDirection(object.properties.get("direction"));
@@ -226,6 +229,7 @@ class TiledLevel extends TiledMap
 				_exitsAvailable.set(direction);
 				_exits.add(exit);
 				group.add(exit);
+				trace(_x + "," + _y + " : " + direction);
 
 			default:
 				trace("objet inconnu : " + object.gid);
@@ -254,10 +258,13 @@ class TiledLevel extends TiledMap
 				sprite.alive = true;
 			}
 			
+			trace("x : " + _x + " - " + _offsetX);
+			trace("y : " + _y + " - " + _offsetY);
+			
 			// TODO: va falloir commenter je crois pour le dézoom et tout
-			//FlxG.camera.setScrollBoundsRect(_offsetX, _offsetY, fullWidth, fullHeight, true);
+			FlxG.camera.setScrollBoundsRect(_offsetX, _offsetY, fullWidth, fullHeight, true);
 			// Pour la collision avec les sorties en dehors de la zone de vision
-			FlxG.worldBounds.set( (-2 * tileWidth) + _offsetX, (-2 * tileHeight) + _offsetY, fullWidth + (4 * tileWidth), fullHeight + (4 * tileHeight));
+			FlxG.worldBounds.set( ( -2 * tileWidth) + _offsetX, ( -2 * tileHeight) + _offsetY, fullWidth + (4 * tileWidth), fullHeight + (4 * tileHeight));
 		} else {
 			// On désactive la salle (on en sort), donc ses sprites 
 			for (sprite in _objectsSpriteTiles) {

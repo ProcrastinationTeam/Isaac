@@ -52,7 +52,10 @@
   <properties>
    <property name="tileset" value="tileset"/>
   </properties>
-  <object id="10" name="Exit_South" type="exit" x="120" y="240"/>
-  <object id="11" name="Start" type="player_start" x="120" y="120"/>
+  <object id="10" name="Exit_Down" type="exit" x="112" y="245" width="16" height="3">
+   <properties>
+    <property name="direction" value="down"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>

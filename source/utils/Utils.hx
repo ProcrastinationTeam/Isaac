@@ -24,7 +24,7 @@ class Utils
 				return Direction.NONE;
 		}
 	}
-
+	
 	/**
 	* Comparateur perso pour trier les sprites par Y croissant (en tenant compte de leur hauteur)
 	* @param	Order
