@@ -18,18 +18,21 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxSort;
 import flixel.util.FlxTimer;
+import haxe.EnumFlags;
+import utils.Utils;
 
 class PlayState extends FlxState
 {
 	public var _level 								: TiledLevel;
 
 	public var _player 								: Player;
-	public var _exits 								: FlxTypedGroup<FlxSprite>;
 
 	private var _maxiGroup 							: FlxTypedGroup<FlxSprite>;
 
-	public var _currentLevel						: Levels = TUTO;
+	public var _currentLevel						: Levels 	= TUTO;
 	public var _previousExitDirection				: Direction = SPECIAL;
+	
+	public var _rooms 								: Array<Array<TiledLevel>>;
 
 	public function new(previousExitDirection:Direction)
 	{
@@ -39,16 +42,42 @@ class PlayState extends FlxState
 
 	override public function create():Void
 	{
-		_exits = new FlxTypedGroup<FlxSprite>();
-
+		var roomsTypes:Array<Array<String>> = [
+			["rd", 	"dl", 		null, 	"d"],
+			["ur", 	"example", "rl", 	"udl"],
+			[null, 	"ud", 		null, 	"ud"],
+			["r", 	"ul", 		null, 	"u"]
+		];
+		
+		_rooms = new Array<Array<TiledLevel>>();
+		
+		for (y in 0...4) {
+			_rooms[y] = new Array<TiledLevel>();
+			for (x in 0...4) {
+				
+				if (roomsTypes[y][x] == null)
+					continue;
+					
+				_rooms[y][x] = new TiledLevel("assets/tiled/" + roomsTypes[y][x] + ".tmx", this, x, y);
+				
+				if (roomsTypes[y][x] == "example") {
+					_rooms[y][x].setActive(true);
+				} else {
+					_rooms[y][x].setActive(false);
+				}
+				
+				add(_rooms[y][x]._backgroundLayer);
+			}
+		}
+		
 		_maxiGroup = new FlxTypedGroup<FlxSprite>();
 
 		switch (_currentLevel)
 		{
 			case TUTO :
-				_level = new TiledLevel("assets/tiled/example.tmx", this);
+				_level = new TiledLevel("assets/tiled/example.tmx", this, 0, 0);
 			case LEVEL_1 :
-				_level = new TiledLevel("assets/tiled/urd.tmx", this);
+				_level = new TiledLevel("assets/tiled/urd.tmx", this, 0, 0);
 			case LEVEL_2 :
 				//
 			case LEVEL_3 :
@@ -56,7 +85,9 @@ class PlayState extends FlxState
 			case END :
 				//
 		}
-
+		
+		_level.setActive(true);
+		
 		// TODO: a bien init
 		if (_previousExitDirection == null)
 		{
@@ -75,25 +106,27 @@ class PlayState extends FlxState
 				_player.setPosition(230, 120);
 			case SPECIAL:
 				_player.setPosition(120, 120);
+			case NONE:
+				// TODO:
 		}
 
 		// Add backgrounds
-		add(_level.backgroundLayer);
-
+		add(_level._backgroundLayer);
+		
 		// TODO: rentre pas dans le maxigroup, fait chier
 		//add(_level.foregroundTiles);
 
 		// TODO: chelou que ça marche pas dans l'autre sens
 		// Add foreground tiles after adding level objects, so these tiles render on top of player
 		//add(_level.foregroundSpriteTiles);
-		_level.foregroundSpriteTiles.forEach(function(sprite:FlxSprite)
+		_level._foregroundSpriteTiles.forEach(function(sprite:FlxSprite)
 		{
 			_maxiGroup.add(sprite);
 		});
 
 		// Add objects layer
 		//add(_level.objectsLayer);
-		_level.objectsSpriteTiles.forEach(function(sprite:FlxSprite)
+		_level._objectsSpriteTiles.forEach(function(sprite:FlxSprite)
 		{
 			_maxiGroup.add(sprite);
 		});
@@ -103,31 +136,23 @@ class PlayState extends FlxState
 		FlxG.camera.zoom = 3;
 		
 		FlxG.camera.fade(FlxColor.BLACK, .2, true);
+		
+		FlxG.camera.follow(_player, LOCKON, 1);
 
 		super.create();
 	}
 
-	/**
-	 * Comparateur perso pour trier les sprites par Y croissant (en tenant compte de leur hauteur)
-	 * @param	Order
-	 * @param	Obj1
-	 * @param	Obj2
-	 * @return
-	 */
-	public function byYDown(Order:Int, Obj1:FlxObject, Obj2:FlxObject):Int
-	{
-		return Obj1.y + Obj1.height < Obj2.y + Obj2.height ? -1 : 1;
-	}
+
 
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
 
-		_maxiGroup.sort(byYDown);
+		_maxiGroup.sort(Utils.sortByYAscending);
 
 		_level.collideWithLevel(_player);
 
-		FlxG.overlap(_player, _exits, PlayerExit);
+		//FlxG.overlap(_player, _level._exits, PlayerExit);
 
 		#if debug
 		/////////////////////////////////////////////////////////////////////// SECTION DEBUG
@@ -186,6 +211,8 @@ class PlayState extends FlxState
 				case LEFT:
 					FlxTween.tween(FlxG.camera, {x: 1000}, 0.3, {onComplete: switchState.bind(_, exit)});
 				case SPECIAL:
+					//
+				case NONE:
 					//
 			}
 			FlxG.camera.fade(FlxColor.BLACK, 0.3, false, function()

@@ -7,4 +7,5 @@ enum Direction
 	DOWN;
 	LEFT;
 	SPECIAL;
+	NONE;
 }

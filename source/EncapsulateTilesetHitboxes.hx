@@ -41,12 +41,12 @@ class EncapsulateTilesetHitboxes
 		
 		_tileSet = tileSet;
 		
-		var tilesetSource = new Fast(Xml.parse(Assets.getText("assets/tiled/tileset.tsx")));
+		var tilesetSource:Fast = new Fast(Xml.parse(Assets.getText("assets/tiled/tileset.tsx")));
 		extractHitboxes(tilesetSource);
 		
 		_isInit = true;
 		
-		trace("ouech");
+		//trace("ouech");
 	}
 	
 	private function extractHitboxes(tilesetSource:Fast):Void

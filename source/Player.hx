@@ -7,6 +7,7 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxVelocity;
 import flixel.system.FlxSound;
 import flixel.util.FlxTimer;
+import utils.Tweaking;
 
 class Player extends FlxSprite
 {
@@ -32,7 +33,7 @@ class Player extends FlxSprite
 		setSize(8, 6);
 		offset.set(4, 10);
 
-		_aaahSound = FlxG.sound.load(AssetPaths.aaaah__wav);
+		//_aaahSound = FlxG.sound.load(AssetPaths.aaaah__wav);
 	}
 
 	override public function update(elapsed:Float):Void

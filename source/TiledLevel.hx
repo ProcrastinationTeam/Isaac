@@ -17,11 +17,13 @@ import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxPoint;
 import flixel.tile.FlxTilemap;
 import flixel.util.FlxColor;
+import haxe.EnumFlags;
 import haxe.io.Path;
 import haxe.xml.Fast;
 import openfl.Assets;
 import states.PlayState;
 import structs.Hitbox;
+import utils.Utils;
 
 // TODO: Séparer la gestion de la Room / Jeu
 class TiledLevel extends TiledMap
@@ -29,75 +31,85 @@ class TiledLevel extends TiledMap
 	// For each "Tile Layer" in the map, you must define a "tileset" property which contains the name of a tile sheet image
 	// used to draw tiles in that layer (without file extension). The image file must be located in the directory specified bellow.
 	// TODO: ça va sortir d'ici
-	private inline static var c_PATH_LEVEL_TILESHEETS = "assets/tiled/";
+	private inline static var c_PATH_LEVEL_TILESHEETS			: String = "assets/tiled/";
 
-	public var backgroundLayer:FlxGroup;
-	public var foregroundSpriteTiles:FlxTypedGroup<FlxSprite>;
-	public var objectsSpriteTiles:FlxTypedGroup<FlxSprite>;
+	// Juste le sol quoi
+	public var _backgroundLayer									: FlxGroup;
 
-	public var hitboxesMap:Map<Int, Array<Hitbox>>;
+	// Elements de décor, souvent avec de la collision (mais juste ça comme "interaction")
+	public var _foregroundSpriteTiles							: FlxTypedGroup<FlxSprite>;
+
+	// Objets du gameplay (sorties, joueur?, ennemis, etc)
+	public var _objectsSpriteTiles								: FlxTypedGroup<FlxSprite>;
+
+	// Liste des sorties de la salle
+	public var _exits 											: FlxTypedGroup<FlxSprite>;
+
+	// Indique (plus facilement) les sorties possibles de la salle
+	public var _exitsAvailable									: EnumFlags<Direction>;
+	
+	// Indique si cette salle est la salle "active" (celle dans lequel le joueur se trouve)
+	// TODO: Mettre en place un mécanisme pour forcer qu'il n'y en ait qu'une à la fois
+	public var _isActive										: Bool = false;
+	
+	public var _x:Int;
+	public var _y:Int;
+	
+	public var _offsetX:Int = 0;
+	public var _offsetY:Int = 0;
 
 	// TODO: Faudrait sortir l'init du tileset et des hitbox, même si pour le tileset c'est mort je pense (ça le fait dans le super)
-	public function new(tiledLevel:Dynamic, state:PlayState)
+	public function new(pathToTiledLevel:String, state:PlayState, x:Int, y:Int)
 	{
-		super(tiledLevel, c_PATH_LEVEL_TILESHEETS);
-		EncapsulateTilesetHitboxes.instance.init(tilesets.get("tileset"));
-		trace(EncapsulateTilesetHitboxes.instance._tileSet.numTiles);
+		super(pathToTiledLevel, c_PATH_LEVEL_TILESHEETS);
 		
-		backgroundLayer = new FlxGroup();
-		foregroundSpriteTiles = new FlxTypedGroup<FlxSprite>();
-		objectsSpriteTiles = new FlxTypedGroup<FlxSprite>();
+		_x = x;
+		_y = y;
+		
+		_offsetX = tileWidth * _x * width;
+		_offsetY = tileHeight * _y * height;
 
-		hitboxesMap = new Map<Int, Array<Hitbox>>();
+		EncapsulateTilesetHitboxes.instance.init(tilesets.get("tileset"));
+		//trace(EncapsulateTilesetHitboxes.instance._tileSet.numTiles);
 
-		FlxG.camera.setScrollBoundsRect(0, 0, fullWidth, fullHeight, true);
-		// Pour la collision avec les sorties en dehors de la zone de vision
-		FlxG.worldBounds.set(-2 * tileWidth, -2 * tileHeight, fullWidth + (4 * tileWidth), fullHeight + (4 * tileHeight));
+		_backgroundLayer = new FlxGroup();
+		_foregroundSpriteTiles = new FlxTypedGroup<FlxSprite>();
+		_objectsSpriteTiles = new FlxTypedGroup<FlxSprite>();
 
-		// Extraction des collisions du foreground
-		extractHitboxes(tiledLevel);
+		_exits = new FlxTypedGroup<FlxSprite>();
+
+		_exitsAvailable = new EnumFlags<Direction>();
+
+		//FlxG.camera.setScrollBoundsRect(0, 0, fullWidth, fullHeight, true);
+		// //Pour la collision avec les sorties en dehors de la zone de vision
+		//FlxG.worldBounds.set(-2 * tileWidth, -2 * tileHeight, fullWidth + (4 * tileWidth), fullHeight + (4 * tileHeight));
 
 		// Load des objets
 		loadObjects(state);
-
+		
 		// Load des layers
 		for (layer in layers)
 		{
-			trace(layer.name + " - " + layer.type);
+			//trace(layer.name + " - " + layer.type);
 			if (layer.type != TiledLayerType.TILE) continue;
+
 			var tileLayer:TiledTileLayer = cast layer;
+			var tileSet:TiledTileSet = EncapsulateTilesetHitboxes.instance._tileSet;
 
-			var tileSheetName:String = tileLayer.properties.get("tileset");
-
-			if (tileSheetName == null)
-				throw "'tileset' property not defined for the '" + tileLayer.name + "' layer. Please add the property to the layer.";
-
-			var tileSet:TiledTileSet = null;
-			for (ts in tilesets)
-			{
-				if (ts.name == tileSheetName)
-				{
-					tileSet = ts;
-					break;
-				}
-			}
-
-			if (tileSet == null)
-				throw "Tileset '" + tileSheetName + " not found. Did you misspell the 'tilesheet' property in " + tileLayer.name + "' layer?";
-
-			var imagePath:Path 		= new Path(tileSet.imageSource);
-			var processedPath:String 	= c_PATH_LEVEL_TILESHEETS + imagePath.file + "." + imagePath.ext;
+			var imagePath:Path = new Path(tileSet.imageSource);
+			var processedPath:String = c_PATH_LEVEL_TILESHEETS + imagePath.file + "." + imagePath.ext;
 
 			var tilemap:FlxTilemap = new FlxTilemap();
 			tilemap.loadMapFromArray(tileLayer.tileArray, width, height, processedPath, tileSet.tileWidth, tileSet.tileHeight, OFF, tileSet.firstGID, 1, 1);
 
 			if (tileLayer.properties.get("layer") == "background")
 			{
-				backgroundLayer.add(tilemap);
+				tilemap.setPosition(tilemap.getPosition().x + _offsetX, tilemap.getPosition().y + _offsetY);
+				_backgroundLayer.add(tilemap);
 			}
-			else if(tileLayer.properties.get("layer") == "foreground")
+			else if (tileLayer.properties.get("layer") == "foreground")
 			{
-				for (key in hitboxesMap.keys())
+				for (key in EncapsulateTilesetHitboxes.instance._hitboxesMap.keys())
 				{
 					// + 1 pour le premier tile vide du tileset qui décale ?
 					var tilesCoords:Array<FlxPoint> = tilemap.getTileCoords(key + 1);
@@ -112,14 +124,14 @@ class TiledLevel extends TiledMap
 							var newSprite:FlxSprite = tilemap.tileToSprite(newX, newY, function(tileProperties:FlxTileProperties):FlxSprite
 							{
 								//TODO: génériser
-								var spriteGroup:FlxSpriteGroup = new FlxSpriteGroup(tileCoord.x - (tileWidth / 2), tileCoord.y - (tileHeight / 2));
+								var spriteGroup:FlxSpriteGroup = new FlxSpriteGroup(tileCoord.x - (tileWidth / 2) + _offsetX, tileCoord.y - (tileHeight / 2) + _offsetY);
 								var sprite:FlxSprite = new FlxSprite();
 								sprite.frame = tileProperties.graphic.frame;
 								sprite.immovable = true;
 								sprite.allowCollisions = FlxObject.NONE;
 								sprite.setSize(tileWidth, tileHeight);
 								spriteGroup.add(sprite);
-								var hitboxescestchouette:Array<Hitbox> = hitboxesMap.get(key);
+								var hitboxescestchouette:Array<Hitbox> = EncapsulateTilesetHitboxes.instance._hitboxesMap.get(key);
 								for (hitbox in hitboxescestchouette)
 								{
 									var spriteHitbox:FlxSprite = new FlxSprite(hitbox.x, hitbox.y);
@@ -133,14 +145,14 @@ class TiledLevel extends TiledMap
 								}
 								return spriteGroup;
 							});
-							foregroundSpriteTiles.add(newSprite);
+							_foregroundSpriteTiles.add(newSprite);
 						}
 					}
 				}
 
-				for (y in 0...15)
+				for (y in 0...height)
 				{
-					for (x in 0...15)
+					for (x in 0...width)
 					{
 						if (tilemap.getTile(x, y) != 0)
 						{
@@ -148,44 +160,21 @@ class TiledLevel extends TiledMap
 							var newSprite:FlxSprite = tilemap.tileToSprite(x, y, function(tileProperties:FlxTileProperties):FlxSprite
 							{
 								//TODO: génériser
-								var sprite:FlxSprite = new FlxSprite(x * 16, y * 16);
+								var sprite:FlxSprite = new FlxSprite((x * tileWidth) + _offsetX, (y * tileHeight) + _offsetY);
 								sprite.frame = tileProperties.graphic.frame;
 								sprite.immovable = true;
 								sprite.allowCollisions = FlxObject.NONE;
-								sprite.setSize(16, 16);
+								sprite.setSize(tileWidth, tileHeight);
 								return sprite;
 							});
-							foregroundSpriteTiles.add(newSprite);
+							_foregroundSpriteTiles.add(newSprite);
 						}
 					}
 				}
-			} else {
-				trace("layer chelou : " + tileLayer.name);
 			}
-		}
-	}
-
-	// TODO: pull requester
-	function extractHitboxes(tiledLevel:Dynamic):Void
-	{
-		var source:Fast = new Fast(Xml.parse(Assets.getText(tiledLevel)));
-		var tilesetSource:Fast = new Fast(Xml.parse(Assets.getText(c_PATH_LEVEL_TILESHEETS + source.node.map.node.tileset.att.source)));
-		var nodes:List<Fast> = tilesetSource.node.tileset.nodes.tile;
-		for (tileNode in nodes)
-		{
-			var id:Int = Std.parseInt(tileNode.att.id);
-			var hitboxes:List<Fast> = tileNode.node.objectgroup.nodes.object;
-			for (hitbox in hitboxes)
+			else
 			{
-				var x:Int = Std.parseInt(hitbox.att.x);
-				var y:Int = Std.parseInt(hitbox.att.y);
-				var width:Int = Std.parseInt(hitbox.att.width);
-				var height:Int = Std.parseInt(hitbox.att.height);
-				if (hitboxesMap.get(id) == null)
-				{
-					hitboxesMap.set(id, new Array<Hitbox>());
-				}
-				hitboxesMap.get(id).push({x : x, y : y, width : width, height : height});
+				trace("layer chelou : " + tileLayer.name);
 			}
 		}
 	}
@@ -206,7 +195,7 @@ class TiledLevel extends TiledMap
 			{
 				for (object in objectLayer.objects)
 				{
-					loadObject(state, object, objectLayer, objectsSpriteTiles);
+					loadObject(state, object, objectLayer, _objectsSpriteTiles);
 				}
 			}
 		}
@@ -214,8 +203,8 @@ class TiledLevel extends TiledMap
 
 	private function loadObject(state:PlayState, object:TiledObject, g:TiledObjectLayer, group:FlxTypedGroup<FlxSprite>)
 	{
-		var x:Int = object.x;
-		var y:Int = object.y;
+		var x:Int = object.x + _offsetX;
+		var y:Int = object.y + _offsetY;
 
 		// objects in tiled are aligned bottom-left (top-left in flixel)
 		if (object.gid != -1)
@@ -232,8 +221,10 @@ class TiledLevel extends TiledMap
 				group.add(player);
 
 			case "exit":
-				var exit:Exit = new Exit(x, y, object.width, object.height, object.properties.get("direction"));
-				state._exits.add(exit);
+				var direction:Direction = utils.Utils.stringToEnumDirection(object.properties.get("direction"));
+				var exit:Exit = new Exit(x, y, object.width, object.height, direction);
+				_exitsAvailable.set(direction);
+				_exits.add(exit);
 				group.add(exit);
 
 			default:
@@ -246,6 +237,35 @@ class TiledLevel extends TiledMap
 	{
 		//TODO: http://forum.haxeflixel.com/topic/512/strange-collision-issue/5
 		// Pour réparer le problème de blocage dans les murs quand on monte ?
-		FlxG.collide(foregroundSpriteTiles, obj);
+		FlxG.collide(_foregroundSpriteTiles, obj);
+	}
+
+	public function setActive(isActive:Bool):Void
+	{
+		_isActive = isActive;
+		if (isActive) {
+			// On active la salle (on rentre dedans quoi)
+			// Il faut activer tous les sprites et recentrer la caméra
+			for (sprite in _objectsSpriteTiles) {
+				// TODO: y'a de la redondance !
+				// TODO: ca risque pas de ressuciter des trucs ?
+				sprite.exists = true;
+				sprite.active = true;
+				sprite.alive = true;
+			}
+			
+			// TODO: va falloir commenter je crois pour le dézoom et tout
+			//FlxG.camera.setScrollBoundsRect(_offsetX, _offsetY, fullWidth, fullHeight, true);
+			// Pour la collision avec les sorties en dehors de la zone de vision
+			FlxG.worldBounds.set( (-2 * tileWidth) + _offsetX, (-2 * tileHeight) + _offsetY, fullWidth + (4 * tileWidth), fullHeight + (4 * tileHeight));
+		} else {
+			// On désactive la salle (on en sort), donc ses sprites 
+			for (sprite in _objectsSpriteTiles) {
+				// TODO: y'a de la redondance !
+				sprite.exists = false;
+				sprite.active = false;
+				sprite.alive = false;
+			}
+		}
 	}
 }
