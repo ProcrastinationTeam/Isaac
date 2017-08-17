@@ -24,6 +24,9 @@ import openfl.Assets;
 import states.PlayState;
 import structs.Hitbox;
 import utils.Utils;
+import structs.CameraBoundsDuCul;
+
+import flixel.tweens.FlxTween;
 
 // TODO: Séparer la gestion de la Room / Jeu
 class TiledLevel extends TiledMap
@@ -57,6 +60,8 @@ class TiledLevel extends TiledMap
 	
 	public var _offsetX:Int = 0;
 	public var _offsetY:Int = 0;
+	
+	public var mabite:CameraBoundsDuCul;
 
 	// TODO: Faudrait sortir l'init du tileset et des hitbox, même si pour le tileset c'est mort je pense (ça le fait dans le super)
 	public function new(pathToTiledLevel:String, state:PlayState, x:Int, y:Int)
@@ -253,6 +258,7 @@ class TiledLevel extends TiledMap
 			for (sprite in _objectsSpriteTiles) {
 				// TODO: y'a de la redondance !
 				// TODO: ca risque pas de ressuciter des trucs ?
+				// TODO: à la fin des tweens + empêcher le joueur de bouger
 				sprite.exists = true;
 				sprite.active = true;
 				sprite.alive = true;
@@ -261,10 +267,17 @@ class TiledLevel extends TiledMap
 			trace("x : " + _x + " - " + _offsetX);
 			trace("y : " + _y + " - " + _offsetY);
 			
+			//var mabite:CameraBoundsDuCul = {minScrollX: FlxG.camera.minScrollX, maxScrollX: FlxG.camera.maxScrollX, minScrollY: FlxG.camera.minScrollY, maxScrollY: FlxG.camera.maxScrollY};
+			mabite = new CameraBoundsDuCul(FlxG.camera.minScrollX, FlxG.camera.maxScrollX, FlxG.camera.minScrollY, FlxG.camera.maxScrollY);
+			
+			//FlxTween.tween(FlxG.camera, {minScrollX: 1000, maxScrollX: 1000, minScrollY: 1000, maxScrollY: 1000}, 0.3);
+			FlxTween.tween(mabite, {minScrollXi: _offsetX, maxScrollXi: _offsetX + fullWidth, minScrollYi: _offsetY, maxScrollYi: _offsetY + fullHeight}, 0.3, 
+							{onUpdate:onUpdate, onComplete:onComplete});
+							
 			// TODO: va falloir commenter je crois pour le dézoom et tout
-			FlxG.camera.setScrollBoundsRect(_offsetX, _offsetY, fullWidth, fullHeight, true);
+			//FlxG.camera.setScrollBoundsRect(_offsetX, _offsetY, fullWidth, fullHeight, true);
 			// Pour la collision avec les sorties en dehors de la zone de vision
-			FlxG.worldBounds.set( ( -2 * tileWidth) + _offsetX, ( -2 * tileHeight) + _offsetY, fullWidth + (4 * tileWidth), fullHeight + (4 * tileHeight));
+			//FlxG.worldBounds.set( ( -2 * tileWidth) + _offsetX, ( -2 * tileHeight) + _offsetY, fullWidth + (4 * tileWidth), fullHeight + (4 * tileHeight));
 		} else {
 			// On désactive la salle (on en sort), donc ses sprites 
 			for (sprite in _objectsSpriteTiles) {
@@ -274,5 +287,19 @@ class TiledLevel extends TiledMap
 				sprite.alive = false;
 			}
 		}
+	}
+	
+	public function onUpdate(tween:FlxTween):Void {
+		trace("mabiiiiiite : " + mabite);
+		var inttt:Int = 10;
+		//FlxG.camera.minScrollX = inttt;
+		//tween.
+		FlxG.camera.setScrollBoundsRect(mabite.minScrollXi, mabite.minScrollYi, fullWidth, fullHeight, true);
+	}
+	
+	public function onComplete(tween:FlxTween):Void {
+		FlxG.camera.setScrollBoundsRect(_offsetX, _offsetY, fullWidth, fullHeight, true);
+		FlxG.worldBounds.set( ( -2 * tileWidth) + _offsetX, ( -2 * tileHeight) + _offsetY, fullWidth + (4 * tileWidth), fullHeight + (4 * tileHeight));
+		//trace("FINI");
 	}
 }

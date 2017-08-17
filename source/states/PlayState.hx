@@ -47,6 +47,11 @@ class PlayState extends FlxState
 	{
 		_maxiGroup = new FlxTypedGroup<FlxSprite>();
 		
+		FlxG.watch.add(FlxG.camera, "minScrollX");
+		FlxG.watch.add(FlxG.camera, "maxScrollX");
+		FlxG.watch.add(FlxG.camera, "minScrollY");
+		FlxG.watch.add(FlxG.camera, "maxScrollY");
+		
 		var roomsTypes:Array<Array<String>> = [
 			["rd", 	"dl", 		null, 	"d"],
 			["ur", 	"example", "rl", 	"udl"],
@@ -70,6 +75,7 @@ class PlayState extends FlxState
 					tempRoom.setActive(true);
 					_currentRoom = tempRoom;
 					_playerPositionInTheLevel.set(x, y);
+					FlxG.camera.setScrollBoundsRect(_currentRoom._offsetX, _currentRoom._offsetY, _currentRoom.fullWidth, _currentRoom.fullHeight, true);
 				} else {
 					tempRoom.setActive(false);
 				}
