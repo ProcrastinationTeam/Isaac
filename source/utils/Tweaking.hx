@@ -7,4 +7,10 @@ class Tweaking
 	// Sprint + stamina
 	public static inline var playerWalkingSpeed							: Float = 75;
 	public static inline var playerSprite								: String = "assets/images/MisterBelly.png";
+	
+	
+	
+	//TWEAKING PROCEDURAL GENERATION
+	public static inline var roomSize									: Int  = 25;
+	
 }
