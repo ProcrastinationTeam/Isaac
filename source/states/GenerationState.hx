@@ -1,6 +1,7 @@
 package states;
 
 import flixel.FlxG;
+import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.group.FlxGroup;
 import flixel.input.FlxInput;
@@ -16,18 +17,12 @@ class GenerationState extends FlxState
 	//POUR LE TEST DES SPRITES
 	public var _player 								: Player;
 	public var tileGroup 		: FlxTypedGroup<GraphicTile>;
-
+	public var doorsGroup 		: FlxTypedGroup<FlxSprite>;
+	
+	
 	override public function create():Void
 	{
-		tileGroup = new FlxTypedGroup<GraphicTile>();
-
-		proceduralGen = new ProceduralGeneration();
-		for (i in 0...proceduralGen.arraySprite.length)
-		{
-			tileGroup.add(proceduralGen.arraySprite[i]);
-		}
-		add(tileGroup);
-		//add(proceduralGen.testSprite);
+		LoadMap();
 		super.create();
 	}
 
@@ -38,19 +33,47 @@ class GenerationState extends FlxState
 			if (FlxG.keys.pressed.R)
 			{
 				remove(tileGroup);
-				tileGroup.clear();
+				//tileGroup.clear();
+				remove(doorsGroup);
 				
-				proceduralGen = new ProceduralGeneration();
-				for (i in 0...proceduralGen.arraySprite.length)
-				{
-					tileGroup.add(proceduralGen.arraySprite[i]);
-				}
-				add(tileGroup);
+				
+				LoadMap();
+				
 				
 				
 			}
+			
+			if (FlxG.keys.pressed.E)
+			{
+				add(proceduralGen.roomSprite);
+			}
 		}
 		
+	}
+	
+	
+	
+	
+	function LoadMap()
+	{
+		tileGroup = new FlxTypedGroup<GraphicTile>();
+		doorsGroup = new FlxTypedGroup<FlxSprite>();
+		
+		
+		proceduralGen = new ProceduralGeneration();
+		for (graphicTile in proceduralGen.arraySprite)
+		{
+			tileGroup.add(graphicTile);
+			for (doors in graphicTile.doorSprites)
+			{
+				doorsGroup.add(doors);
+			}
+			
+		}
+		
+		add(tileGroup);
+		add(doorsGroup);
+
 	}
 
 }
