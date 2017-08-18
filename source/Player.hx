@@ -39,108 +39,88 @@ class Player extends FlxSprite
 
 	override public function update(elapsed:Float):Void
 	{
-		// Gestion du mouvement
 		movement();
 
 		super.update(elapsed);
 	}
-
 	
+	// TODO: pas e(encore) utilisé
 	public function shoot():FlxSprite
 	{
-		var _up:Bool = false;
-		var _down:Bool = false;
-		var _left:Bool = false;
-		var _right:Bool = false;
-
-		_up = FlxG.keys.anyPressed([UP]);
-		_down = FlxG.keys.anyPressed([DOWN]);
-		_left = FlxG.keys.anyPressed([LEFT]);
-		_right = FlxG.keys.anyPressed([RIGHT]);
+		var shootUp:Bool = FlxG.keys.anyPressed([Tweaking.shootUp]);
+		var shootDown:Bool = FlxG.keys.anyPressed([Tweaking.shootDown]);
+		var shootLeft:Bool = FlxG.keys.anyPressed([Tweaking.shootLeft]);
+		var shootRight:Bool = FlxG.keys.anyPressed([Tweaking.shootRight]);
 		
-		
-			var bullet : FlxSprite = new FlxSprite(250, 250);
-			_bulletSprite = new FlxSprite(this.getPosition().x, this.getPosition().y);
-			return _bulletSprite;
+		var bullet : FlxSprite = new FlxSprite(250, 250);
+		_bulletSprite = new FlxSprite(this.getPosition().x, this.getPosition().y);
+		return _bulletSprite;
 	}
 	
-	
 	/**
-	 * Gestion des mouvements et sprint
+	 * Gestion des mouvements
 	 */
 	private function movement():Void
 	{
-		var _up:Bool = false;
-		var _down:Bool = false;
-		var _left:Bool = false;
-		var _right:Bool = false;
-
-		// AZERTY
-		_up = FlxG.keys.anyPressed([Z]);
-		_down = FlxG.keys.anyPressed([S]);
-		_left = FlxG.keys.anyPressed([Q]);
-		_right = FlxG.keys.anyPressed([D]);
+		var moveUp:Bool = FlxG.keys.anyPressed([Tweaking.moveUp]);
+		var moveDown:Bool = FlxG.keys.anyPressed([Tweaking.moveDown]);
+		var moveLeft:Bool = FlxG.keys.anyPressed([Tweaking.moveLeft]);
+		var moveRight:Bool = FlxG.keys.anyPressed([Tweaking.moveRight]);
 		
-		// QWERTY
-		//_up = FlxG.keys.anyPressed([UP, W]);
-		//_down = FlxG.keys.anyPressed([DOWN, S]);
-		//_left = FlxG.keys.anyPressed([LEFT, A]);
-		//_right = FlxG.keys.anyPressed([RIGHT, D]);
-
-		if (_up && _down)
+		if (moveUp && moveDown)
 		{
-			_up = _down = false;
+			moveUp = moveDown = false;
 		}
 
-		if (_left && _right)
+		if (moveLeft && moveRight)
 		{
-			_left = _right = false;
+			moveLeft = moveRight = false;
 		}
 
-		if (_up || _down || _left || _right)
+		if (moveUp || moveDown || moveLeft || moveRight)
 		{
 			var _ma:Float = 0;
 
-			if (_up)
+			if (moveUp)
 			{
 				_ma = -90;
-				if (_left)
+				if (moveLeft)
 				{
 					_ma -= 45;
 				}
-				else if (_right)
+				else if (moveRight)
 				{
 					_ma += 45;
 				}
 			}
-			else if (_down)
+			else if (moveDown)
 			{
 				_ma = 90;
-				if (_left)
+				if (moveLeft)
 				{
 					_ma += 45;
 				}
-				else if (_right)
+				else if (moveRight)
 				{
 					_ma -= 45;
 				}
 			}
-			else if (_left)
+			else if (moveLeft)
 			{
 				_ma = 180;
 				facing = FlxObject.LEFT;
 			}
-			else if (_right)
+			else if (moveRight)
 			{
 				_ma = 0;
 				facing = FlxObject.RIGHT;
 			}
 
-			if (_left)
+			if (moveLeft)
 			{
 				facing = FlxObject.LEFT;
 			}
-			else if (_right)
+			else if (moveRight)
 			{
 				facing = FlxObject.RIGHT;
 			}

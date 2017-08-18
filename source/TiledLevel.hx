@@ -24,7 +24,7 @@ import openfl.Assets;
 import states.PlayState;
 import structs.Hitbox;
 import utils.Utils;
-import structs.CameraBoundsDuCul;
+import structs.CameraBounds;
 
 import flixel.tweens.FlxTween;
 
@@ -50,51 +50,46 @@ class TiledLevel extends TiledMap
 
 	// Indique (plus facilement) les sorties possibles de la salle
 	public var _exitsAvailable									: EnumFlags<Direction>;
-	
+
 	// Indique si cette salle est la salle "active" (celle dans lequel le joueur se trouve)
 	// TODO: Mettre en place un mécanisme pour forcer qu'il n'y en ait qu'une à la fois
 	public var _isActive										: Bool = false;
-	
-	public var _x:Int;
-	public var _y:Int;
-	
-	public var _offsetX:Int = 0;
-	public var _offsetY:Int = 0;
-	
-	public var mabite:CameraBoundsDuCul;
+
+	// Position de la salle dans la grille du level
+	public var _x												: Int = 0;
+	public var _y												: Int = 0;
+
+	// Offset à donner à tous les élements pour bien les placer en fonction de la position de la salle
+	public var _offsetX											: Int = 0;
+	public var _offsetY											: Int = 0;
+
+	// Pour faire du tweening sur la caméra
+	public var _cameraBounds									: CameraBounds = {minScrollX : 0, minScrollY : 0};
 
 	// TODO: Faudrait sortir l'init du tileset et des hitbox, même si pour le tileset c'est mort je pense (ça le fait dans le super)
 	public function new(pathToTiledLevel:String, state:PlayState, x:Int, y:Int)
 	{
 		super(pathToTiledLevel, c_PATH_LEVEL_TILESHEETS);
-		
+
 		_x = x;
 		_y = y;
-		
+
 		_offsetX = tileWidth * _x * width;
 		_offsetY = tileHeight * _y * height;
-		
-					//trace("x : " + _x + " - " + _offsetX);
-			//trace("y : " + _y + " - " + _offsetY);
 
+		// TODO: ranger
 		EncapsulateTilesetHitboxes.instance.init(tilesets.get("tileset"));
-		//trace(EncapsulateTilesetHitboxes.instance._tileSet.numTiles);
 
 		_backgroundLayer = new FlxGroup();
 		_foregroundSpriteTiles = new FlxTypedGroup<FlxSprite>();
 		_objectsSpriteTiles = new FlxTypedGroup<FlxSprite>();
 
 		_exits = new FlxTypedGroup<FlxSprite>();
-
 		_exitsAvailable = new EnumFlags<Direction>();
-
-		//FlxG.camera.setScrollBoundsRect(0, 0, fullWidth, fullHeight, true);
-		// //Pour la collision avec les sorties en dehors de la zone de vision
-		//FlxG.worldBounds.set(-2 * tileWidth, -2 * tileHeight, fullWidth + (4 * tileWidth), fullHeight + (4 * tileHeight));
 
 		// Load des objets
 		loadObjects(state);
-		
+
 		// Load des layers
 		for (layer in layers)
 		{
@@ -213,7 +208,7 @@ class TiledLevel extends TiledMap
 	{
 		var x:Int = object.x + _offsetX;
 		var y:Int = object.y + _offsetY;
-		
+
 		// objects in tiled are aligned bottom-left (top-left in flixel)
 		if (object.gid != -1)
 		{
@@ -234,7 +229,7 @@ class TiledLevel extends TiledMap
 				_exitsAvailable.set(direction);
 				_exits.add(exit);
 				group.add(exit);
-				trace(_x + "," + _y + " : " + direction);
+				//trace(_x + "," + _y + " : " + direction);
 
 			default:
 				trace("objet inconnu : " + object.gid);
@@ -252,35 +247,20 @@ class TiledLevel extends TiledMap
 	public function setActive(isActive:Bool):Void
 	{
 		_isActive = isActive;
-		if (isActive) {
+		if (isActive)
+		{
 			// On active la salle (on rentre dedans quoi)
 			// Il faut activer tous les sprites et recentrer la caméra
-			for (sprite in _objectsSpriteTiles) {
-				// TODO: y'a de la redondance !
-				// TODO: ca risque pas de ressuciter des trucs ?
-				// TODO: à la fin des tweens + empêcher le joueur de bouger
-				sprite.exists = true;
-				sprite.active = true;
-				sprite.alive = true;
-			}
-			
-			trace("x : " + _x + " - " + _offsetX);
-			trace("y : " + _y + " - " + _offsetY);
-			
-			//var mabite:CameraBoundsDuCul = {minScrollX: FlxG.camera.minScrollX, maxScrollX: FlxG.camera.maxScrollX, minScrollY: FlxG.camera.minScrollY, maxScrollY: FlxG.camera.maxScrollY};
-			mabite = new CameraBoundsDuCul(FlxG.camera.minScrollX, FlxG.camera.maxScrollX, FlxG.camera.minScrollY, FlxG.camera.maxScrollY);
-			
-			//FlxTween.tween(FlxG.camera, {minScrollX: 1000, maxScrollX: 1000, minScrollY: 1000, maxScrollY: 1000}, 0.3);
-			FlxTween.tween(mabite, {minScrollXi: _offsetX, maxScrollXi: _offsetX + fullWidth, minScrollYi: _offsetY, maxScrollYi: _offsetY + fullHeight}, 0.3, 
-							{onUpdate:onUpdate, onComplete:onComplete});
-							
-			// TODO: va falloir commenter je crois pour le dézoom et tout
-			//FlxG.camera.setScrollBoundsRect(_offsetX, _offsetY, fullWidth, fullHeight, true);
-			// Pour la collision avec les sorties en dehors de la zone de vision
-			//FlxG.worldBounds.set( ( -2 * tileWidth) + _offsetX, ( -2 * tileHeight) + _offsetY, fullWidth + (4 * tileWidth), fullHeight + (4 * tileHeight));
-		} else {
-			// On désactive la salle (on en sort), donc ses sprites 
-			for (sprite in _objectsSpriteTiles) {
+			_cameraBounds = {
+				minScrollX: FlxG.camera.minScrollX == null ? 0 : Std.int(FlxG.camera.minScrollX),
+				minScrollY: FlxG.camera.minScrollY == null ? 0 : Std.int(FlxG.camera.minScrollY)
+			};
+			FlxTween.tween(_cameraBounds, {minScrollX: _offsetX, minScrollY: _offsetY}, 0.3, {onUpdate:onUpdateTweeningCameraBounds, onComplete:onCompleteTweeningCameraBounds});
+		}
+		else {
+			// On désactive la salle (on en sort), donc ses sprites
+			for (sprite in _objectsSpriteTiles)
+			{
 				// TODO: y'a de la redondance !
 				sprite.exists = false;
 				sprite.active = false;
@@ -288,18 +268,25 @@ class TiledLevel extends TiledMap
 			}
 		}
 	}
-	
-	public function onUpdate(tween:FlxTween):Void {
-		trace("mabiiiiiite : " + mabite);
-		var inttt:Int = 10;
-		//FlxG.camera.minScrollX = inttt;
-		//tween.
-		FlxG.camera.setScrollBoundsRect(mabite.minScrollXi, mabite.minScrollYi, fullWidth, fullHeight, true);
+
+	public function onUpdateTweeningCameraBounds(tween:FlxTween):Void
+	{
+		FlxG.camera.setScrollBoundsRect(_cameraBounds.minScrollX, _cameraBounds.minScrollY, fullWidth, fullHeight, true);
 	}
-	
-	public function onComplete(tween:FlxTween):Void {
+
+	public function onCompleteTweeningCameraBounds(tween:FlxTween):Void
+	{
 		FlxG.camera.setScrollBoundsRect(_offsetX, _offsetY, fullWidth, fullHeight, true);
 		FlxG.worldBounds.set( ( -2 * tileWidth) + _offsetX, ( -2 * tileHeight) + _offsetY, fullWidth + (4 * tileWidth), fullHeight + (4 * tileHeight));
-		//trace("FINI");
+
+		for (sprite in _objectsSpriteTiles)
+		{
+			// TODO: y'a de la redondance !
+			// TODO: ca risque pas de ressuciter des trucs ?
+			// TODO: à la fin des tweens + empêcher le joueur de bouger
+			sprite.exists = true;
+			sprite.active = true;
+			sprite.alive = true;
+		}
 	}
 }

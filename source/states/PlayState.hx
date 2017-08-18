@@ -1,26 +1,15 @@
 package states;
 
 import enums.Direction;
-import enums.Levels;
-import flixel.FlxCamera;
 import flixel.FlxG;
-import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
-import flixel.addons.editors.ogmo.FlxOgmoLoader;
 import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.input.FlxPointer;
-import flixel.math.FlxMath;
-import flixel.system.FlxSound;
-import flixel.tile.FlxTilemap;
-import flixel.tweens.FlxEase;
+import flixel.math.FlxPoint;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
-import flixel.util.FlxSort;
-import flixel.util.FlxTimer;
-import haxe.EnumFlags;
+import utils.Tweaking;
 import utils.Utils;
-import flixel.math.FlxPoint;
 
 class PlayState extends FlxState
 {
@@ -47,14 +36,9 @@ class PlayState extends FlxState
 	{
 		_maxiGroup = new FlxTypedGroup<FlxSprite>();
 
-		FlxG.watch.add(FlxG.camera, "minScrollX");
-		FlxG.watch.add(FlxG.camera, "maxScrollX");
-		FlxG.watch.add(FlxG.camera, "minScrollY");
-		FlxG.watch.add(FlxG.camera, "maxScrollY");
-
 		var roomsTypes:Array<Array<String>> = [
 			["rd", 	"dl", 		null, 	"d"],
-			["ur", 	"example", "rl", 	"udl"],
+			["ur", 	"_start",	 "rl", 	"udl"],
 			[null, 	"ud", 		null, 	"ud"],
 			["r", 	"ul", 		null, 	"u"]
 		];
@@ -73,7 +57,7 @@ class PlayState extends FlxState
 				var tempRoom:TiledLevel = new TiledLevel("assets/tiled/" + roomsTypes[y][x] + ".tmx", this, x, y);
 				_rooms[y][x] = tempRoom;
 
-				if (roomsTypes[y][x] == "example")
+				if (roomsTypes[y][x] == "_start")
 				{
 					tempRoom.setActive(true);
 					_currentRoom = tempRoom;
@@ -104,49 +88,6 @@ class PlayState extends FlxState
 
 		_currentRoom.setActive(true);
 
-		// TODO: a bien init
-		//if (_previousExitDirection == null)
-		//{
-		//_previousExitDirection = Direction.SPECIAL;
-		//}
-
-		//switch (_previousExitDirection)
-		//{
-		//case UP:
-		//_player.setPosition(120, 230);
-		//case RIGHT:
-		//_player.setPosition(10, 120);
-		//case DOWN:
-		//_player.setPosition(120, 10);
-		//case LEFT:
-		//_player.setPosition(230, 120);
-		//case SPECIAL:
-		//_player.setPosition(120, 120);
-		//case NONE:
-		//// TODO:
-		//}
-
-		// Add backgrounds
-		//add(_currentRoom._backgroundLayer);
-		//
-		//// TODO: rentre pas dans le maxigroup, fait chier
-		////add(_level.foregroundTiles);
-//
-		//// TODO: chelou que ça marche pas dans l'autre sens
-		//// Add foreground tiles after adding level objects, so these tiles render on top of player
-		////add(_level.foregroundSpriteTiles);
-		//_currentRoom._foregroundSpriteTiles.forEach(function(sprite:FlxSprite)
-		//{
-		//_maxiGroup.add(sprite);
-		//});
-//
-		//// Add objects layer
-		////add(_level.objectsLayer);
-		//_currentRoom._objectsSpriteTiles.forEach(function(sprite:FlxSprite)
-		//{
-		//_maxiGroup.add(sprite);
-		//});
-
 		_maxiGroup.add(_player);
 
 		add(_maxiGroup);
@@ -154,8 +95,6 @@ class PlayState extends FlxState
 		FlxG.camera.zoom = 3;
 
 		FlxG.camera.fade(FlxColor.BLACK, .2, true);
-
-		//FlxG.camera.follow(_player, LOCKON, 1);
 
 		super.create();
 	}
@@ -170,24 +109,23 @@ class PlayState extends FlxState
 
 		FlxG.overlap(_player, _currentRoom._exits, PlayerExit);
 
-		
-		if (FlxG.keys.justPressed.UP)
+		if (FlxG.keys.anyPressed([Tweaking.shootUp]))
 		{
 			add(new Bullet(_player.getPosition().x, _player.getPosition().y, Direction.UP));
 		}
-		else if (FlxG.keys.justPressed.RIGHT)
+		else if (FlxG.keys.anyPressed([Tweaking.shootRight]))
 		{
 			add(new Bullet(_player.getPosition().x, _player.getPosition().y, Direction.RIGHT));
 		}
-		else if (FlxG.keys.justPressed.DOWN)
+		else if (FlxG.keys.anyPressed([Tweaking.shootDown]))
 		{
 			add(new Bullet(_player.getPosition().x, _player.getPosition().y, Direction.DOWN));
 		}
-		else if (FlxG.keys.justPressed.LEFT)
+		else if (FlxG.keys.anyPressed([Tweaking.shootLeft]))
 		{
 			add(new Bullet(_player.getPosition().x, _player.getPosition().y, Direction.LEFT));
 		}
-		
+
 		#if debug
 		/////////////////////////////////////////////////////////////////////// SECTION DEBUG
 		// Il faut obligatoirement avoir SHIFT d'enfoncer pour utiliser ces fonctions de debug
@@ -196,12 +134,10 @@ class PlayState extends FlxState
 			// Aller direct à l'exit
 			if (FlxG.keys.justPressed.D)
 			{
-
 				//add(_player.shoot());
 				//var newBullet : FlxSprite = _player.shoot();
 				//add(newBullet);
 
-				
 				//new Bullet(
 				//add(new Bullet(250,250));
 				//switch (_currentLevel)
@@ -223,9 +159,7 @@ class PlayState extends FlxState
 				//_player.y = 32;
 				//}
 			}
-			
-			
-			
+
 			FlxG.camera.zoom += FlxG.mouse.wheel / 20;
 		}
 		////////////////////////////////////////////////// FIN SECTION DEBUG
