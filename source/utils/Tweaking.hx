@@ -6,17 +6,20 @@ class Tweaking
 	// De la forme
 	// public static inline var varName 								: varType = varValue;
 	
-	// Sprint + stamina
+	/////////////////////////////////////////////////////////////////////////////////////////////// Player
 	public static inline var playerWalkingSpeed							: Float = 150;
 	public static inline var playerSprite								: String = "assets/images/MisterBelly.png";
 	
-	// Bullets
+	/////////////////////////////////////////////////////////////////////////////////////////////// Bullets
 	public static inline var bulletSpeed								: Int = 200;
+		
+	/////////////////////////////////////////////////////////////////////////////////////////////// Traps
+	public static inline var trapBulletCooldown							: Float = 1;
 	
-	//TWEAKING PROCEDURAL GENERATION
+	/////////////////////////////////////////////////////////////////////////////////////////////// TWEAKING PROCEDURAL GENERATION
 	public static inline var roomSize									: Int  = 25;
 	
-	// Inputs (ça va bouger de fichier)
+	/////////////////////////////////////////////////////////////////////////////////////////////// Inputs (ça va bouger de fichier)
 	
 	// AZERTY
 	public static inline var moveUp										: FlxKey = FlxKey.Z;

@@ -95,6 +95,9 @@ class PlayState extends FlxState
 		FlxG.camera.zoom = 3;
 
 		FlxG.camera.fade(FlxColor.BLACK, .2, true);
+		
+		var t:BulletsTrap = new BulletsTrap(_player.x, _player.y, this);
+		add(t);
 
 		super.create();
 	}
