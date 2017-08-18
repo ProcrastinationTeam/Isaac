@@ -13,6 +13,7 @@ class Player extends FlxSprite
 {
 	// Polishing
 	public var _aaahSound							: FlxSound;
+	public var _bulletSprite						: FlxSprite;
 
 	public function new(?X:Float=0, ?Y:Float=0)
 	{
@@ -44,6 +45,27 @@ class Player extends FlxSprite
 		super.update(elapsed);
 	}
 
+	
+	public function shoot():FlxSprite
+	{
+		var _up:Bool = false;
+		var _down:Bool = false;
+		var _left:Bool = false;
+		var _right:Bool = false;
+
+		// AZERTY
+		_up = FlxG.keys.anyPressed([Z]);
+		_down = FlxG.keys.anyPressed([S]);
+		_left = FlxG.keys.anyPressed([Q]);
+		_right = FlxG.keys.anyPressed([D]);
+		
+		
+			var bullet : FlxSprite = new FlxSprite(250, 250);
+			_bulletSprite = new FlxSprite(this.getPosition().x, this.getPosition().y);
+			return _bulletSprite;
+	}
+	
+	
 	/**
 	 * Gestion des mouvements et sprint
 	 */
@@ -55,10 +77,10 @@ class Player extends FlxSprite
 		var _right:Bool = false;
 
 		// AZERTY
-		_up = FlxG.keys.anyPressed([UP, Z]);
-		_down = FlxG.keys.anyPressed([DOWN, S]);
-		_left = FlxG.keys.anyPressed([LEFT, Q]);
-		_right = FlxG.keys.anyPressed([RIGHT, D]);
+		_up = FlxG.keys.anyPressed([UP]);
+		_down = FlxG.keys.anyPressed([DOWN]);
+		_left = FlxG.keys.anyPressed([LEFT]);
+		_right = FlxG.keys.anyPressed([RIGHT]);
 		
 		// QWERTY
 		//_up = FlxG.keys.anyPressed([UP, W]);
