@@ -170,26 +170,25 @@ class PlayState extends FlxState
 
 		FlxG.overlap(_player, _currentRoom._exits, PlayerExit);
 
+		
+		if (FlxG.keys.justPressed.UP)
+		{
+			add(new Bullet(_player.getPosition().x, _player.getPosition().y, Direction.UP));
+		}
+		else if (FlxG.keys.justPressed.RIGHT)
+		{
+			add(new Bullet(_player.getPosition().x, _player.getPosition().y, Direction.RIGHT));
+		}
+		else if (FlxG.keys.justPressed.DOWN)
+		{
+			add(new Bullet(_player.getPosition().x, _player.getPosition().y, Direction.DOWN));
+		}
+		else if (FlxG.keys.justPressed.LEFT)
+		{
+			add(new Bullet(_player.getPosition().x, _player.getPosition().y, Direction.LEFT));
+		}
+		
 		#if debug
-		
-		
-		if (FlxG.keys.justPressed.Z)
-			{
-				add(new Bullet(_player.getPosition().x, _player.getPosition().y,0));
-			}
-			if (FlxG.keys.justPressed.D)
-			{
-				add(new Bullet(_player.getPosition().x, _player.getPosition().y,1));
-			}
-				if (FlxG.keys.justPressed.S)
-			{
-				add(new Bullet(_player.getPosition().x, _player.getPosition().y,2));
-			}
-				if (FlxG.keys.justPressed.Q)
-			{
-				add(new Bullet(_player.getPosition().x, _player.getPosition().y,3));
-			}
-		
 		/////////////////////////////////////////////////////////////////////// SECTION DEBUG
 		// Il faut obligatoirement avoir SHIFT d'enfoncer pour utiliser ces fonctions de debug
 		if (FlxG.keys.pressed.SHIFT)

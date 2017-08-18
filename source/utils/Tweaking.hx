@@ -8,6 +8,9 @@ class Tweaking
 	public static inline var playerWalkingSpeed							: Float = 150;
 	public static inline var playerSprite								: String = "assets/images/MisterBelly.png";
 	
+	// Bullets
+	public static inline var bulletSpeed								: Int = 200;
+	
 	
 	
 	//TWEAKING PROCEDURAL GENERATION

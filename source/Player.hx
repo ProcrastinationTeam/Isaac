@@ -53,11 +53,10 @@ class Player extends FlxSprite
 		var _left:Bool = false;
 		var _right:Bool = false;
 
-		// AZERTY
-		_up = FlxG.keys.anyPressed([Z]);
-		_down = FlxG.keys.anyPressed([S]);
-		_left = FlxG.keys.anyPressed([Q]);
-		_right = FlxG.keys.anyPressed([D]);
+		_up = FlxG.keys.anyPressed([UP]);
+		_down = FlxG.keys.anyPressed([DOWN]);
+		_left = FlxG.keys.anyPressed([LEFT]);
+		_right = FlxG.keys.anyPressed([RIGHT]);
 		
 		
 			var bullet : FlxSprite = new FlxSprite(250, 250);
@@ -77,10 +76,10 @@ class Player extends FlxSprite
 		var _right:Bool = false;
 
 		// AZERTY
-		_up = FlxG.keys.anyPressed([UP]);
-		_down = FlxG.keys.anyPressed([DOWN]);
-		_left = FlxG.keys.anyPressed([LEFT]);
-		_right = FlxG.keys.anyPressed([RIGHT]);
+		_up = FlxG.keys.anyPressed([Z]);
+		_down = FlxG.keys.anyPressed([S]);
+		_left = FlxG.keys.anyPressed([Q]);
+		_right = FlxG.keys.anyPressed([D]);
 		
 		// QWERTY
 		//_up = FlxG.keys.anyPressed([UP, W]);

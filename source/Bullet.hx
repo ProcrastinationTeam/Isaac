@@ -1,26 +1,17 @@
 package;
 
+import enums.Direction;
 import flixel.FlxSprite;
-import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.util.FlxColor;
+import utils.Tweaking;
 
-/**
- * ...
- * @author ElRyoGrande
- */
-enum Direction{UP; RIGHT; DOWN; LEFT; }
- 
 class Bullet extends FlxSprite 
 {
-
-	
-	
-	var speed				: Int = 100;
-	var Xspeed				:Int = 0;
-	var Yspeed				:Int = 0;
+	var Xspeed						: Int = 0;
+	var Yspeed						: Int = 0;
 	
 	public var _isHorizontal 		: Bool;
-	public var _isShooted 			: Bool = false;
+	public var _isShot 			: Bool = false;
 	
 /*	public function new(?X:Float=0, ?Y:Float=0) 
 	{
@@ -33,25 +24,25 @@ class Bullet extends FlxSprite
 		
 	}*/
 	
-	override public function new(X:Float=0,Y:Float=0,dir:Int)
+	override public function new(X:Float=0, Y:Float=0, dir:Direction)
 	{
 		super(X, Y);
 		
 		defineDirection(dir);
 		
-		trace(dir);
-		_isShooted = true;
+		//trace(dir);
+		_isShot = true;
 		makeGraphic(5, 5, FlxColor.BLACK, false);
 	}
 	
-	public function defineDirection(dir:Int)
+	public function defineDirection(dir:Direction)
 	{
 		switch dir {
-			case 0: Yspeed = -speed; 
-			case 1: Xspeed = speed;
-			case 2: Yspeed = speed;
-			case 3: Xspeed = -speed;
-			default: Yspeed = Xspeed = 0; 
+			case UP:		Yspeed = -Tweaking.bulletSpeed; 
+			case RIGHT: 	Xspeed = Tweaking.bulletSpeed;
+			case DOWN: 		Yspeed = Tweaking.bulletSpeed;
+			case LEFT: 		Xspeed = -Tweaking.bulletSpeed;
+			default: 		Yspeed = Xspeed = 0; 
 		}
 	}
 	
@@ -62,12 +53,10 @@ class Bullet extends FlxSprite
 	
 	override public function update(elapsed:Float):Void
 	{
-
-		if (_isShooted)
+		if (_isShot)
 		{
 			this.velocity.set(Xspeed, Yspeed);
 		}
 		super.update(elapsed);
 	}
-	
 }
