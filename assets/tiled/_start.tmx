@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" tiledversion="1.0.2" orientation="orthogonal" renderorder="right-down" width="15" height="15" tilewidth="16" tileheight="16" nextobjectid="15">
+ <tileset firstgid="1" source="tileset.tsx"/>
+ <layer name="Background" width="15" height="15">
+  <properties>
+   <property name="layer" value="background"/>
+   <property name="nocollide" value="true"/>
+   <property name="tileset" value="tileset"/>
+  </properties>
+  <data encoding="csv">
+964,964,964,964,964,964,964,964,964,964,964,964,964,964,964,
+964,964,964,964,964,964,964,964,964,964,964,964,964,964,964,
+964,964,964,964,964,964,964,964,964,964,964,964,964,964,964,
+964,964,964,964,964,964,964,964,964,964,964,964,964,964,964,
+964,964,964,964,715,715,964,964,964,964,964,964,964,964,964,
+964,964,964,964,715,715,964,964,964,964,964,964,964,964,964,
+964,964,964,964,715,715,964,964,964,964,964,964,964,964,964,
+964,964,964,964,715,715,964,964,964,964,964,964,964,964,964,
+964,964,964,964,964,964,964,964,964,964,964,964,964,964,964,
+964,964,964,964,964,964,964,964,964,964,964,964,964,964,964,
+964,964,964,964,964,964,964,964,964,964,964,964,964,964,964,
+964,964,964,964,964,964,964,964,964,964,964,964,964,964,964,
+964,964,964,964,964,964,964,964,964,964,964,964,964,964,964,
+964,964,964,964,964,964,964,964,964,964,964,964,964,964,964,
+964,964,964,964,964,964,964,964,964,964,964,964,964,964,964
+</data>
+ </layer>
+ <layer name="Foreground" width="15" height="15">
+  <properties>
+   <property name="layer" value="foreground"/>
+   <property name="tileset" value="tileset"/>
+  </properties>
+  <data encoding="csv">
+540,541,541,541,541,541,541,576,541,541,541,541,541,541,542,
+577,0,0,0,0,0,0,0,0,0,0,0,0,0,579,
+577,0,0,0,0,0,0,0,0,0,0,0,0,0,579,
+577,0,0,0,0,0,0,0,0,541,0,0,0,0,579,
+577,0,0,0,577,579,0,0,0,0,0,0,0,0,579,
+577,0,0,0,577,579,0,0,0,0,0,0,0,0,579,
+577,0,0,0,577,579,0,0,0,615,0,0,0,0,579,
+0,0,0,0,577,0,0,0,0,0,0,0,0,0,0,
+577,0,0,0,0,0,0,0,0,0,0,0,0,0,579,
+577,0,0,0,0,0,0,0,0,0,0,0,0,0,579,
+577,0,0,0,0,0,0,0,0,0,0,0,0,0,579,
+577,0,0,0,0,0,0,0,0,0,0,0,0,0,579,
+577,0,0,0,0,0,0,0,0,0,0,0,0,0,579,
+577,0,0,0,0,0,0,0,0,0,0,0,0,0,579,
+614,615,615,615,615,615,615,576,615,615,615,615,615,615,616
+</data>
+ </layer>
+ <objectgroup name="Objects">
+  <object id="14" name="Exit_Left" type="exit" x="-8" y="112" width="3" height="16">
+   <properties>
+    <property name="direction" value="left"/>
+   </properties>
+  </object>
+  <object id="10" name="Exit_South" type="exit" x="112" y="245" width="16" height="3">
+   <properties>
+    <property name="direction" value="down"/>
+   </properties>
+  </object>
+  <object id="13" name="Exit_Right" type="exit" x="245" y="112" width="3" height="16">
+   <properties>
+    <property name="direction" value="right"/>
+   </properties>
+  </object>
+  <object id="12" name="Exit_Down" type="exit" x="112" y="-8" width="16" height="3">
+   <properties>
+    <property name="direction" value="up"/>
+   </properties>
+  </object>
+  <object id="11" name="Start" type="player_start" x="120" y="120"/>
+ </objectgroup>
+</map>
