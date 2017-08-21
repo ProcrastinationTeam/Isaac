@@ -40,10 +40,14 @@ class TiledLevel extends TiledMap
 	public var _backgroundLayer									: FlxGroup;
 
 	// Elements de décor, souvent avec de la collision (mais juste ça comme "interaction")
+	// Si on en fait passe en TOP DOWN complètement (plus de perspective comme audébut), on peut en faire un groupe normal (là c'est pour pouvoir trier par position pour l'affichage)
 	public var _foregroundSpriteTiles							: FlxTypedGroup<FlxSprite>;
 
 	// Objets du gameplay (sorties, joueur?, ennemis, etc)
 	public var _objectsSpriteTiles								: FlxTypedGroup<FlxSprite>;
+	
+	public var _foregroundTiles									: FlxGroup;
+	//public var spriteGroup												: FlxSpriteGroup;
 
 	// Liste des sorties de la salle
 	public var _exits 											: FlxTypedGroup<FlxSprite>;
@@ -83,6 +87,8 @@ class TiledLevel extends TiledMap
 		_backgroundLayer = new FlxGroup();
 		_foregroundSpriteTiles = new FlxTypedGroup<FlxSprite>();
 		_objectsSpriteTiles = new FlxTypedGroup<FlxSprite>();
+		
+		_foregroundTiles = new FlxGroup();
 
 		_exits = new FlxTypedGroup<FlxSprite>();
 		_exitsAvailable = new EnumFlags<Direction>();
@@ -112,6 +118,8 @@ class TiledLevel extends TiledMap
 			}
 			else if (tileLayer.properties.get("layer") == "foreground")
 			{
+				//spriteGroup = new FlxSpriteGroup(_offsetX, _offsetY);
+				
 				for (key in EncapsulateTilesetHitboxes.instance._hitboxesMap.keys())
 				{
 					// + 1 pour le premier tile vide du tileset qui décale ?
@@ -174,6 +182,9 @@ class TiledLevel extends TiledMap
 						}
 					}
 				}
+				
+				tilemap.setPosition(tilemap.getPosition().x + _offsetX, tilemap.getPosition().y + _offsetY);
+				_foregroundTiles.add(tilemap);
 			}
 			else
 			{

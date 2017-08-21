@@ -37,18 +37,22 @@ class PlayState extends FlxState
 		_maxiGroup = new FlxTypedGroup<FlxSprite>();
 
 		var roomsTypes:Array<Array<String>> = [
-			["rd", 	"dl", 		null, 	"d"],
-			["ur", 	"_start",	 "rl", 	"udl"],
-			[null, 	"ud", 		null, 	"ud"],
-			["r", 	"ul", 		null, 	"u"]
+			["rd", 		"dl", 		null, 		"d", 		null, 		null, 		null, 		null],
+			["ur", 		"_start",	"rl", 		"udl", 		null, 		null, 		null, 		null],
+			[null, 		"ud", 		null, 		"ud", 		null, 		null, 		null, 		null],
+			["r", 		"ul", 		null, 		"ud", 		null, 		null, 		null, 		null],
+			[null,		null,		null,		"ud",		null,		"rd",		"rl",		"l"],
+			["r",		"rdl",		"rl",		"ul",		null,		"ud",		null,		null],
+			[null,		"ud",		null,		null,		"rd",		"urdl",		"rl",		"dl"],
+			[null,		"ur",		"rl",		"rl",		"url",		"ul",		null,		"u"]
 		];
 
 		_rooms = new Array<Array<TiledLevel>>();
 
-		for (y in 0...4)
+		for (y in 0...8)
 		{
 			_rooms[y] = new Array<TiledLevel>();
-			for (x in 0...4)
+			for (x in 0...8)
 			{
 
 				if (roomsTypes[y][x] == null)
@@ -63,26 +67,29 @@ class PlayState extends FlxState
 					_currentRoom = tempRoom;
 					_playerPositionInTheLevel.set(x, y);
 					FlxG.camera.setScrollBoundsRect(_currentRoom._offsetX, _currentRoom._offsetY, _currentRoom.fullWidth, _currentRoom.fullHeight, true);
+					
+					////////////
+					tempRoom._foregroundSpriteTiles.forEach(function(sprite:FlxSprite)
+					{
+						_maxiGroup.add(sprite);
+					});
+
+					// Add objects layer
+					tempRoom._objectsSpriteTiles.forEach(function(sprite:FlxSprite)
+					{
+						_maxiGroup.add(sprite);
+					});
+					////////////
 				}
 				else
 				{
 					tempRoom.setActive(false);
+					add(tempRoom._foregroundTiles);
 				}
 
 				add(tempRoom._backgroundLayer);
-
-				////////////
-				tempRoom._foregroundSpriteTiles.forEach(function(sprite:FlxSprite)
-				{
-					_maxiGroup.add(sprite);
-				});
-
-				// Add objects layer
-				tempRoom._objectsSpriteTiles.forEach(function(sprite:FlxSprite)
-				{
-					_maxiGroup.add(sprite);
-				});
-				////////////
+				//add(tempRoom._foregroundTiles);
+				//add(tempRoom.spriteGroup);
 			}
 		}
 
@@ -203,8 +210,25 @@ class PlayState extends FlxState
 			//FlxTween.tween(FlxG.camera, {x:720}, 0.3, {onComplete: switchState});
 			//FlxG.switchState(new PlayState(exit._direction));
 			_currentRoom.setActive(false);
+			_maxiGroup.clear();
 			var nextRoom:TiledLevel = getNextRoom(exit._direction);
 			_currentRoom = nextRoom;
+			
+			////////////
+			_currentRoom._foregroundSpriteTiles.forEach(function(sprite:FlxSprite)
+			{
+				_maxiGroup.add(sprite);
+			});
+
+			// Add objects layer
+			_currentRoom._objectsSpriteTiles.forEach(function(sprite:FlxSprite)
+			{
+				_maxiGroup.add(sprite);
+			});
+			////////////
+			
+			_maxiGroup.add(_player);
+			
 			_currentRoom.setActive(true);
 		}
 	}
