@@ -10,6 +10,9 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import utils.Tweaking;
 import utils.Utils;
+import flixel.addons.util.FlxAsyncLoop;
+import hud.Hud;
+import flixel.FlxCamera;
 
 class PlayState extends FlxState
 {
@@ -23,8 +26,11 @@ class PlayState extends FlxState
 
 	//public var _previousExitDirection				: Direction = SPECIAL;
 
-	public var _rooms 								: Array<Array<TiledLevel>>;
-	public var _currentRoom 						: TiledLevel;
+	public var _rooms 								: Array<Array<TiledRoom>>;
+	public var _currentRoom 						: TiledRoom;
+	
+	private var _hud								: Hud;
+	private var _hudCam 							: FlxCamera;
 
 	//public function new(previousExitDirection:Direction)
 	//{
@@ -47,18 +53,18 @@ class PlayState extends FlxState
 			[null,		"ur",		"rl",		"rl",		"url",		"ul",		null,		"u"]
 		];
 
-		_rooms = new Array<Array<TiledLevel>>();
+		_rooms = new Array<Array<TiledRoom>>();
 
 		for (y in 0...8)
 		{
-			_rooms[y] = new Array<TiledLevel>();
+			_rooms[y] = new Array<TiledRoom>();
 			for (x in 0...8)
 			{
 
 				if (roomsTypes[y][x] == null)
 					continue;
 
-				var tempRoom:TiledLevel = new TiledLevel("assets/tiled/" + roomsTypes[y][x] + ".tmx", this, x, y);
+				var tempRoom:TiledRoom = new TiledRoom("assets/tiled/" + roomsTypes[y][x] + ".tmx", this, x, y);
 				_rooms[y][x] = tempRoom;
 
 				if (roomsTypes[y][x] == "_start")
@@ -92,7 +98,9 @@ class PlayState extends FlxState
 				//add(tempRoom.spriteGroup);
 			}
 		}
-
+		
+		//var loop:FlxAsyncLoop = new FlxAsyncLoop(
+		
 		_currentRoom.setActive(true);
 
 		_maxiGroup.add(_player);
@@ -105,6 +113,18 @@ class PlayState extends FlxState
 		
 		var t:BulletsTrap = new BulletsTrap(_player.x, _player.y, this);
 		add(t);
+		
+		///////////////////////////////////////////////////////////////////////////////////////////////
+		_hud = new Hud(_player);
+		add(_hud);
+
+		// Caméra pour le HUD du téléphone
+		_hudCam = new FlxCamera(0, 0, _hud._width, _hud._height);
+		_hudCam.zoom = 1;
+		_hudCam.bgColor = FlxColor.TRANSPARENT;
+		_hudCam.follow(_hud._testSprite, NO_DEAD_ZONE);
+		FlxG.cameras.add(_hudCam);
+		///////////////////////////////////////////////////////////////////////////////////////////////
 
 		super.create();
 	}
@@ -209,9 +229,12 @@ class PlayState extends FlxState
 			//});
 			//FlxTween.tween(FlxG.camera, {x:720}, 0.3, {onComplete: switchState});
 			//FlxG.switchState(new PlayState(exit._direction));
+			FlxG.camera.fade(FlxColor.BLACK, .2, false, function() {
+				FlxG.camera.fade(FlxColor.BLACK, .1, true);
+			});
 			_currentRoom.setActive(false);
 			_maxiGroup.clear();
-			var nextRoom:TiledLevel = getNextRoom(exit._direction);
+			var nextRoom:TiledRoom = getNextRoom(exit._direction);
 			_currentRoom = nextRoom;
 			
 			////////////
@@ -233,7 +256,7 @@ class PlayState extends FlxState
 		}
 	}
 
-	private function getNextRoom(exitDirection:Direction):TiledLevel
+	private function getNextRoom(exitDirection:Direction):TiledRoom
 	{
 
 		// TODO: Ajouter des controles

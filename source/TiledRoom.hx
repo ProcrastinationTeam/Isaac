@@ -1,7 +1,6 @@
 package;
 
 import Exit;
-import Map;
 import enums.Direction;
 import flixel.FlxG;
 import flixel.FlxObject;
@@ -16,20 +15,17 @@ import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxPoint;
 import flixel.tile.FlxTilemap;
+import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import haxe.EnumFlags;
 import haxe.io.Path;
-import haxe.xml.Fast;
-import openfl.Assets;
 import states.PlayState;
+import structs.CameraBounds;
 import structs.Hitbox;
 import utils.Utils;
-import structs.CameraBounds;
-
-import flixel.tweens.FlxTween;
 
 // TODO: Séparer la gestion de la Room / Jeu
-class TiledLevel extends TiledMap
+class TiledRoom extends TiledMap
 {
 	// For each "Tile Layer" in the map, you must define a "tileset" property which contains the name of a tile sheet image
 	// used to draw tiles in that layer (without file extension). The image file must be located in the directory specified bellow.
@@ -71,9 +67,9 @@ class TiledLevel extends TiledMap
 	public var _cameraBounds									: CameraBounds = {minScrollX : 0, minScrollY : 0};
 
 	// TODO: Faudrait sortir l'init du tileset et des hitbox, même si pour le tileset c'est mort je pense (ça le fait dans le super)
-	public function new(pathToTiledLevel:String, state:PlayState, x:Int, y:Int)
+	public function new(pathToTiledRoom:String, state:PlayState, x:Int, y:Int)
 	{
-		super(pathToTiledLevel, c_PATH_LEVEL_TILESHEETS);
+		super(pathToTiledRoom, c_PATH_LEVEL_TILESHEETS);
 
 		_x = x;
 		_y = y;
