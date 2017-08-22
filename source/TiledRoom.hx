@@ -37,19 +37,22 @@ class TiledRoom extends TiledMap
 
 	// Elements de décor, souvent avec de la collision (mais juste ça comme "interaction")
 	// Si on en fait passe en TOP DOWN complètement (plus de perspective comme audébut), on peut en faire un groupe normal (là c'est pour pouvoir trier par position pour l'affichage)
-	public var _foregroundSpriteTiles							: FlxTypedGroup<FlxSprite>;
+	public var _foregroundSprites								: FlxTypedGroup<FlxSprite>;
 
 	// Objets du gameplay (sorties, joueur?, ennemis, etc)
-	public var _objectsSpriteTiles								: FlxTypedGroup<FlxSprite>;
+	public var _objectsSprites									: FlxTypedGroup<FlxSprite>;
 	
 	public var _foregroundTiles									: FlxGroup;
-	//public var spriteGroup												: FlxSpriteGroup;
+	//public var spriteGroup									: FlxSpriteGroup;
 
 	// Liste des sorties de la salle
-	public var _exits 											: FlxTypedGroup<FlxSprite>;
+	public var _exits 											: FlxTypedGroup<Exit>;
 
 	// Indique (plus facilement) les sorties possibles de la salle
 	public var _exitsAvailable									: EnumFlags<Direction>;
+	
+	// Liste des sorties de la salle
+	public var _bullets 										: FlxTypedGroup<Bullet>;
 
 	// Indique si cette salle est la salle "active" (celle dans lequel le joueur se trouve)
 	// TODO: Mettre en place un mécanisme pour forcer qu'il n'y en ait qu'une à la fois
@@ -81,12 +84,13 @@ class TiledRoom extends TiledMap
 		EncapsulateTilesetHitboxes.instance.init(tilesets.get("tileset"));
 
 		_backgroundLayer = new FlxGroup();
-		_foregroundSpriteTiles = new FlxTypedGroup<FlxSprite>();
-		_objectsSpriteTiles = new FlxTypedGroup<FlxSprite>();
+		_foregroundSprites = new FlxTypedGroup<FlxSprite>();
+		_objectsSprites = new FlxTypedGroup<FlxSprite>();
 		
 		_foregroundTiles = new FlxGroup();
 
-		_exits = new FlxTypedGroup<FlxSprite>();
+		_exits = new FlxTypedGroup<Exit>();
+		_bullets = new FlxTypedGroup<Bullet>();
 		_exitsAvailable = new EnumFlags<Direction>();
 
 		// Load des objets
@@ -152,7 +156,7 @@ class TiledRoom extends TiledMap
 								}
 								return spriteGroup;
 							});
-							_foregroundSpriteTiles.add(newSprite);
+							_foregroundSprites.add(newSprite);
 						}
 					}
 				}
@@ -174,7 +178,7 @@ class TiledRoom extends TiledMap
 								sprite.setSize(tileWidth, tileHeight);
 								return sprite;
 							});
-							_foregroundSpriteTiles.add(newSprite);
+							_foregroundSprites.add(newSprite);
 						}
 					}
 				}
@@ -205,7 +209,7 @@ class TiledRoom extends TiledMap
 			{
 				for (object in objectLayer.objects)
 				{
-					loadObject(state, object, objectLayer, _objectsSpriteTiles);
+					loadObject(state, object, objectLayer, _objectsSprites);
 				}
 			}
 		}
@@ -248,7 +252,7 @@ class TiledRoom extends TiledMap
 	{
 		//TODO: http://forum.haxeflixel.com/topic/512/strange-collision-issue/5
 		// Pour réparer le problème de blocage dans les murs quand on monte ?
-		FlxG.collide(_foregroundSpriteTiles, obj);
+		FlxG.collide(_foregroundSprites, obj);
 	}
 
 	public function setActive(isActive:Bool):Void
@@ -266,7 +270,7 @@ class TiledRoom extends TiledMap
 		}
 		else {
 			// On désactive la salle (on en sort), donc ses sprites
-			for (sprite in _objectsSpriteTiles)
+			for (sprite in _objectsSprites)
 			{
 				// TODO: y'a de la redondance !
 				sprite.exists = false;
@@ -286,7 +290,7 @@ class TiledRoom extends TiledMap
 		FlxG.camera.setScrollBoundsRect(_offsetX, _offsetY, fullWidth, fullHeight, true);
 		FlxG.worldBounds.set( ( -2 * tileWidth) + _offsetX, ( -2 * tileHeight) + _offsetY, fullWidth + (4 * tileWidth), fullHeight + (4 * tileHeight));
 
-		for (sprite in _objectsSpriteTiles)
+		for (sprite in _objectsSprites)
 		{
 			// TODO: y'a de la redondance !
 			// TODO: ca risque pas de ressuciter des trucs ?

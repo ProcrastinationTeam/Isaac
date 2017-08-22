@@ -75,17 +75,18 @@ class PlayState extends FlxState
 					FlxG.camera.setScrollBoundsRect(_currentRoom._offsetX, _currentRoom._offsetY, _currentRoom.fullWidth, _currentRoom.fullHeight, true);
 					
 					////////////
-					tempRoom._foregroundSpriteTiles.forEach(function(sprite:FlxSprite)
+					tempRoom._foregroundSprites.forEach(function(sprite:FlxSprite)
 					{
 						_maxiGroup.add(sprite);
 					});
 
 					// Add objects layer
-					tempRoom._objectsSpriteTiles.forEach(function(sprite:FlxSprite)
+					tempRoom._objectsSprites.forEach(function(sprite:FlxSprite)
 					{
 						_maxiGroup.add(sprite);
 					});
 					////////////
+					//add(_currentRoom._bullets);
 				}
 				else
 				{
@@ -138,22 +139,31 @@ class PlayState extends FlxState
 		_currentRoom.collideWithLevel(_player);
 
 		FlxG.overlap(_player, _currentRoom._exits, PlayerExit);
+		FlxG.collide(_currentRoom._bullets, _currentRoom._foregroundSprites, BulletHitsForeground);
 
 		if (FlxG.keys.anyPressed([Tweaking.shootUp]))
 		{
-			add(new Bullet(_player.getPosition().x, _player.getPosition().y, Direction.UP));
+			var bullet:Bullet = new Bullet(_player.getPosition().x, _player.getPosition().y - 8, Direction.UP);
+			_currentRoom._bullets.add(bullet);
+			add(bullet);
 		}
 		else if (FlxG.keys.anyPressed([Tweaking.shootRight]))
 		{
-			add(new Bullet(_player.getPosition().x, _player.getPosition().y, Direction.RIGHT));
+			var bullet:Bullet = new Bullet(_player.getPosition().x + 8, _player.getPosition().y, Direction.RIGHT);
+			_currentRoom._bullets.add(bullet);
+			add(bullet);
 		}
 		else if (FlxG.keys.anyPressed([Tweaking.shootDown]))
 		{
-			add(new Bullet(_player.getPosition().x, _player.getPosition().y, Direction.DOWN));
+			var bullet:Bullet = new Bullet(_player.getPosition().x, _player.getPosition().y + 8, Direction.DOWN);
+			_currentRoom._bullets.add(bullet);
+			add(bullet);
 		}
 		else if (FlxG.keys.anyPressed([Tweaking.shootLeft]))
 		{
-			add(new Bullet(_player.getPosition().x, _player.getPosition().y, Direction.LEFT));
+			var bullet:Bullet = new Bullet(_player.getPosition().x - 8, _player.getPosition().y, Direction.LEFT);
+			_currentRoom._bullets.add(bullet);
+			add(bullet);
 		}
 
 		#if debug
@@ -164,30 +174,8 @@ class PlayState extends FlxState
 			// Aller direct à l'exit
 			if (FlxG.keys.justPressed.D)
 			{
-				//add(_player.shoot());
-				//var newBullet : FlxSprite = _player.shoot();
-				//add(newBullet);
-
-				//new Bullet(
-				//add(new Bullet(250,250));
-				//switch (_currentLevel)
-				//{
-				//case TUTO :
 				//_player.x = 256;
 				//_player.y = 432;
-				//case LEVEL_1 :
-				//_player.x = 1232;
-				//_player.y = 432;
-				//case LEVEL_2 :
-				//_player.x = 48;
-				//_player.y = 32;
-				//case LEVEL_3 :
-				//_player.x = 576;
-				//_player.y = 32;
-				//case END :
-				//_player.x = 160;
-				//_player.y = 32;
-				//}
 			}
 
 			FlxG.camera.zoom += FlxG.mouse.wheel / 20;
@@ -238,22 +226,30 @@ class PlayState extends FlxState
 			_currentRoom = nextRoom;
 			
 			////////////
-			_currentRoom._foregroundSpriteTiles.forEach(function(sprite:FlxSprite)
+			_currentRoom._foregroundSprites.forEach(function(sprite:FlxSprite)
 			{
 				_maxiGroup.add(sprite);
 			});
 
 			// Add objects layer
-			_currentRoom._objectsSpriteTiles.forEach(function(sprite:FlxSprite)
+			_currentRoom._objectsSprites.forEach(function(sprite:FlxSprite)
 			{
 				_maxiGroup.add(sprite);
 			});
+			add(_currentRoom._bullets);
 			////////////
 			
 			_maxiGroup.add(_player);
 			
 			_currentRoom.setActive(true);
 		}
+	}
+	
+	private function BulletHitsForeground(bullet:Bullet, sprite:FlxSprite):Void
+	{
+		_currentRoom._bullets.remove(bullet);
+		remove(bullet);
+		bullet.kill();
 	}
 
 	private function getNextRoom(exitDirection:Direction):TiledRoom

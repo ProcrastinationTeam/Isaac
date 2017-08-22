@@ -11,7 +11,9 @@ class Bullet extends FlxSprite
 	var Yspeed						: Int = 0;
 	
 	public var _isHorizontal 		: Bool;
-	public var _isShot 			: Bool = false;
+	public var _isShot 				: Bool = false;
+	
+	public var _timeSinceSpawn		: Float = 0;
 	
 /*	public function new(?X:Float=0, ?Y:Float=0) 
 	{
@@ -32,7 +34,8 @@ class Bullet extends FlxSprite
 		
 		//trace(dir);
 		_isShot = true;
-		makeGraphic(5, 5, FlxColor.BLACK, false);
+		makeGraphic(3, 3, FlxColor.BLACK, false);
+		this.velocity.set(Xspeed, Yspeed);
 	}
 	
 	public function defineDirection(dir:Direction)
@@ -53,10 +56,12 @@ class Bullet extends FlxSprite
 	
 	override public function update(elapsed:Float):Void
 	{
-		if (_isShot)
-		{
-			this.velocity.set(Xspeed, Yspeed);
+		if (_timeSinceSpawn > Tweaking.bulletLifeSpan) {
+			kill();
+		} else {
+			_timeSinceSpawn += elapsed;
 		}
+		
 		super.update(elapsed);
 	}
 }
