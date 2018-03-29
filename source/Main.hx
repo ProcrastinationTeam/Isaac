@@ -5,6 +5,7 @@ import openfl.display.Sprite;
 import states.PlayState;
 import states.GenerationState;
 import enums.Levels;
+import states.ProceduralState;
 
 class Main extends Sprite
 {
